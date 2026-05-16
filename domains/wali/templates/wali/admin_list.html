@@ -1,0 +1,87 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Daftar Wali Murid - {{ school_name }}{% endblock %}
+{% block header_title %}Manajemen Wali Murid{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Breadcrumb & Action -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-blue-600">Wali Murid</span>
+        </div>
+        <a href="{{ url_for('wali.create_wali') }}" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-black text-xs shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+            <i class="fas fa-plus"></i> Tambah Wali Baru
+        </a>
+    </div>
+
+    <!-- Wali Table -->
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Wali</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">No. HP / WhatsApp</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% if wali_list %}
+                        {% for wali in wali_list %}
+                        <tr class="group hover:bg-slate-50/30 transition-all duration-300">
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-base group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
+                                        {{ wali.full_name[0] if wali.full_name else 'W' }}
+                                    </div>
+                                    <div>
+                                        <p class="font-black text-slate-900 text-base leading-tight">{{ wali.full_name }}</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {{ wali.id[:8] }}...</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-2 text-sm font-bold text-slate-600">
+                                    <i class="fab fa-whatsapp text-emerald-500"></i>
+                                    {{ wali.phone_number or '-' }}
+                                </div>
+                            </td>
+                            <td class="px-10 py-6">
+                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                                    Wali Murid
+                                </span>
+                            </td>
+                            <td class="px-10 py-6 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="#" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all flex items-center justify-center">
+                                        <i class="fas fa-edit text-[10px]"></i>
+                                    </a>
+                                    <a href="#" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center">
+                                        <i class="fas fa-trash text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-10 py-24 text-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto mb-6">
+                                <i class="fas fa-user-group text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-900">Belum Ada Data Wali</h3>
+                            <p class="text-slate-400 font-bold mt-1">Tambahkan wali murid untuk memberikan akses portal orang tua.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

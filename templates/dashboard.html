@@ -1,0 +1,371 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Dashboard Admin - ERP Tahfidz Premium{% endblock %}
+{% block header_title %}Overview Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="space-y-8 pb-12">
+    
+    <!-- ══ WELCOME SECTION ══ -->
+    <div class="relative overflow-hidden bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-8">
+        <div class="relative z-10 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">Selamat Datang, {{ session.get('user_name') }}! 👋</h1>
+            <p class="text-slate-500 font-bold max-w-lg leading-relaxed">
+                Hari ini adalah hari yang luar biasa untuk mengelola ekosistem pendidikan sekolah Anda. Pantau semua aktivitas santri dan pengajar dalam satu dashboard.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center md:justify-start gap-4">
+                <div class="px-5 py-2.5 bg-blue-50 text-blue-600 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-blue-100">
+                    <i class="fas fa-calendar-day mr-2"></i> {{ now }}
+                </div>
+                <div class="px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-emerald-100">
+                    <i class="fas fa-shield-check mr-2"></i> System Active
+                </div>
+            </div>
+        </div>
+        <div class="relative z-10 w-48 h-48 bg-blue-600 rounded-[3.5rem] flex items-center justify-center shadow-2xl shadow-blue-500/20 rotate-3 hover:rotate-0 transition-transform duration-500">
+            <i class="fas fa-school text-6xl text-white"></i>
+        </div>
+        <!-- Decorative bg -->
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-blue-50 rounded-full opacity-30"></div>
+    </div>
+
+    <!-- ══ STATS GRID (6 Cards) ══ -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+        {% set stats_data = [
+            ('Total Santri', stats.total_santri if stats else '120', 'fas fa-user-graduate', 'bg-blue-50 text-blue-600'),
+            ('Total Guru', '12', 'fas fa-chalkboard-teacher', 'bg-amber-50 text-amber-600'),
+            ('Total Kelas', classes|length, 'fas fa-door-open', 'bg-emerald-50 text-emerald-600'),
+            ('Total Halaqoh', '8', 'fas fa-book-quran', 'bg-indigo-50 text-indigo-600'),
+            ('Kehadiran', '96%', 'fas fa-calendar-check', 'bg-rose-50 text-rose-600'),
+            ('Setoran Hafalan', '45', 'fas fa-microphone', 'bg-violet-50 text-violet-600')
+        ] %}
+
+        {% for label, val, icon, style in stats_data %}
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/40 transition-all group">
+            <div class="w-12 h-12 rounded-xl {{ style }} flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+                <i class="{{ icon }}"></i>
+            </div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ label }}</p>
+            <p class="text-2xl font-black text-slate-900 leading-none">{{ val }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- ══ INTERACTIVE ANALYTICS HUB ══ -->
+        <div class="lg:col-span-2 bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm transition-all duration-500">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Analitik Interaktif</h3>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Pantau performa sekolah secara real-time</p>
+                </div>
+                
+                <!-- Chart Tabs -->
+                <div class="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                    <button onclick="updateChart('siswa')" id="tab-siswa" class="chart-tab active px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Siswa</button>
+                    <button onclick="updateChart('guru')" id="tab-guru" class="chart-tab px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Guru</button>
+                    <button onclick="updateChart('belajar')" id="tab-belajar" class="chart-tab px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Belajar</button>
+                    <button onclick="updateChart('hafalan')" id="tab-hafalan" class="chart-tab px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Hafalan</button>
+                </div>
+            </div>
+
+            <div class="relative h-80">
+                <canvas id="interactiveChart"></canvas>
+            </div>
+
+            <!-- Legend Info -->
+            <div id="chart-legend" class="mt-8 flex flex-wrap gap-4 pt-6 border-t border-slate-50">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- ══ QUICK ACTIONS MENU ══ -->
+        <div class="bg-slate-900 p-10 rounded-[3rem] shadow-2xl shadow-slate-900/20 text-white">
+            <h3 class="text-xl font-black mb-8 flex items-center gap-3">
+                <i class="fas fa-bolt text-amber-400"></i> Menu Aksi Cepat
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+                {% set actions = [
+                    ('Tambah Santri', 'tambah_siswa', 'fas fa-user-plus', 'bg-blue-600', ''),
+                    ('Tambah Kelas', 'tambah_kelas', 'fas fa-plus', 'bg-emerald-600', ''),
+                    ('Absensi', 'academic.input_absensi', 'fas fa-calendar-check', 'bg-amber-600', ''),
+                    ('Input Nilai', 'coming_soon', 'fas fa-star', 'bg-indigo-600', 'Input Nilai'),
+                    ('Penugasan', 'academic.manage_assignments', 'fas fa-tasks', 'bg-rose-600', ''),
+                    ('Grup Halaqoh', 'list_halaqoh', 'fas fa-users', 'bg-violet-600', ''),
+                    ('Setoran', 'coming_soon', 'fas fa-microphone', 'bg-teal-600', 'Setoran Hafalan'),
+                    ('Target', 'manage_weekly_targets', 'fas fa-bullseye', 'bg-rose-500', ''),
+                    ('Raport', 'coming_soon', 'fas fa-copy', 'bg-slate-700', 'Raport Digital'),
+                    ('Pengaturan', 'coming_soon', 'fas fa-cog', 'bg-slate-500', 'Pengaturan Sekolah')
+                ] %}
+
+                {% for label, route, icon, color, module in actions %}
+                <a href="{{ url_for(route, module_name=module) if module else (url_for(route) if route else '#') }}" class="group flex flex-col items-center justify-center p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white hover:text-slate-900 transition-all duration-500">
+                    <div class="w-10 h-10 rounded-xl {{ color }} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="{{ icon }} text-xs text-white"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-tighter text-center">{{ label }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- ══ RECENT ACTIVITY ══ -->
+        <div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+            <h3 class="text-xl font-black text-slate-900 tracking-tight mb-8 flex items-center gap-3">
+                <i class="fas fa-history text-blue-500"></i> Aktivitas Terbaru
+            </h3>
+            <div class="space-y-6">
+                {% set activities = [
+                    ('Penambahan Santri', 'Santri baru Ahmad Zaid telah didaftarkan.', '2 jam yang lalu', 'fa-user-plus', 'text-emerald-500 bg-emerald-50'),
+                    ('Absensi Selesai', 'Kelas IX-A Tahfidz telah menyelesaikan absensi.', '4 jam yang lalu', 'fa-check-circle', 'text-blue-500 bg-blue-50'),
+                    ('Setoran Baru', '5 santri telah menyetorkan hafalan hari ini.', '5 jam yang lalu', 'fa-microphone', 'text-amber-500 bg-amber-50')
+                ] %}
+
+                {% for title, desc, time, icon, color in activities %}
+                <div class="flex gap-6 group">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-2xl {{ color }} flex items-center justify-center text-lg group-hover:rotate-12 transition-transform">
+                        <i class="fas {{ icon }}"></i>
+                    </div>
+                    <div class="flex-1 border-b border-slate-50 pb-6 group-last:border-0">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-black text-slate-900 text-sm tracking-tight">{{ title }}</h4>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ time }}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed font-medium">{{ desc }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="w-full py-4 mt-4 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-blue-50 hover:text-blue-600 transition-all">Lihat Semua Aktivitas</button>
+        </div>
+
+        <!-- ══ SCHOOL ANNOUNCEMENTS ══ -->
+        <div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
+            <h3 class="text-xl font-black text-slate-900 tracking-tight mb-8 flex items-center gap-3">
+                <i class="fas fa-bullhorn text-rose-500"></i> Pengumuman Sekolah
+            </h3>
+            <div class="space-y-4">
+                <div class="p-6 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-500/20">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase tracking-widest">Penting</span>
+                        <span class="text-[9px] opacity-70">14 Mei 2026</span>
+                    </div>
+                    <h4 class="font-black text-base mb-2 tracking-tight">Persiapan Ujian Akhir Semester</h4>
+                    <p class="text-xs opacity-80 leading-relaxed font-medium">Harap semua guru segera melengkapi input nilai harian santri sebelum tanggal 20 Mei.</p>
+                </div>
+
+                <div class="p-6 bg-slate-50 border border-slate-100 rounded-3xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="px-3 py-1 bg-slate-200 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest">Info</span>
+                        <span class="text-[9px] text-slate-400">12 Mei 2026</span>
+                    </div>
+                    <h4 class="font-black text-slate-900 text-base mb-2 tracking-tight">Libur Akhir Pekan</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed font-medium">Kegiatan halaqoh ditiadakan pada hari Sabtu mendatang sehubungan dengan agenda rapat tahunan.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══ TABLE SECTION (CLASSES) ══ -->
+    <div class="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-10 py-10 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Rombel / Kelas</h2>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Manajemen Ruang Belajar Sekolah</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="text" placeholder="Cari kelas..." class="pl-11 pr-6 py-3 bg-slate-50 border-transparent rounded-2xl text-xs font-bold outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/5 transition-all w-64">
+                </div>
+                <a href="{{ url_for('tambah_kelas') }}" class="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">+ Kelas</a>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Ruang Kelas</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Wali Kelas / Musyrif</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Manajemen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for item in classes %}
+                    <tr class="group hover:bg-slate-50/30 transition-all duration-300">
+                        <td class="px-10 py-8">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-sm">
+                                    <i class="fas fa-door-open"></i>
+                                </div>
+                                <span class="font-black text-slate-900 text-lg tracking-tight">{{ item.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-10 py-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xs font-black text-slate-500 border border-slate-200">
+                                    {{ (item.teachers.name if item.teachers else '?')[0] }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-black text-slate-700 leading-none mb-1">
+                                        {{ item.teachers.name if item.teachers else 'Belum ditentukan' }}
+                                    </p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Wali Kelas Aktif</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-10 py-8 text-center">
+                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-100">Aktif</span>
+                        </td>
+                        <td class="px-10 py-8 text-right">
+                            <div class="flex justify-end gap-3 translate-x-4 group-hover:translate-x-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <a href="{{ url_for('edit_kelas', id=item.id) }}" class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </a>
+                                <a href="{{ url_for('hapus_kelas', id=item.id) }}" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center shadow-sm" onclick="return confirm('Hapus kelas ini?')">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-10 py-32 text-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto mb-6">
+                                <i class="fas fa-folder-open text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-900 tracking-tight">Data Kelas Kosong</h3>
+                            <p class="text-slate-400 font-bold mt-1 text-sm">Anda belum menambahkan rombongan belajar / kelas.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chart-tab.active {
+        background: #2563eb;
+        color: white;
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+    }
+</style>
+
+<script>
+    // ══ DATA STORAGE ══
+    const chartConfigs = {
+        siswa: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            datasets: [
+                { label: 'Hadir', data: [95, 98, 92, 96, 94, 90, 88], color: '#2563eb', type: 'line' },
+                { label: 'Sakit/Izin', data: [5, 2, 8, 4, 6, 10, 12], color: '#94a3b8', type: 'line', dashed: true }
+            ]
+        },
+        guru: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            datasets: [
+                { label: 'Hadir Tepat Waktu', data: [12, 11, 12, 10, 12, 11, 10], color: '#10b981', type: 'bar' },
+                { label: 'Terlambat', data: [0, 1, 0, 2, 0, 1, 2], color: '#f59e0b', type: 'bar' }
+            ]
+        },
+        belajar: {
+            labels: ['Pekan 1', 'Pekan 2', 'Pekan 3', 'Pekan 4'],
+            datasets: [
+                { label: 'Kelas Aktif', data: [12, 15, 14, 18], color: '#6366f1', type: 'line' },
+                { label: 'Mapel Berjalan', data: [45, 48, 50, 52], color: '#8b5cf6', type: 'line' }
+            ]
+        },
+        hafalan: {
+            labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+            datasets: [
+                { label: 'Target', data: [100, 100, 100, 100], color: '#cbd5e1', type: 'line', dashed: true },
+                { label: 'Capaian', data: [75, 82, 88, 94], color: '#2563eb', type: 'line' }
+            ]
+        }
+    };
+
+    let mainChart;
+
+    // ══ INITIALIZE CHART ══
+    function initChart() {
+        const ctx = document.getElementById('interactiveChart').getContext('2d');
+        mainChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: [], datasets: [] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { weight: 'bold', size: 10 }, color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { weight: 'bold', size: 10 }, color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+        updateChart('siswa'); // Load default
+    }
+
+    // ══ UPDATE CHART LOGIC ══
+    function updateChart(type) {
+        const config = chartConfigs[type];
+        
+        // Update Tabs UI
+        document.querySelectorAll('.chart-tab').forEach(btn => {
+            btn.classList.remove('active', 'text-white', 'bg-blue-600');
+            btn.classList.add('text-slate-400');
+        });
+        const activeBtn = document.getElementById(`tab-${type}`);
+        activeBtn.classList.add('active');
+        activeBtn.classList.remove('text-slate-400');
+
+        // Update Chart Data
+        mainChart.data.labels = config.labels;
+        mainChart.data.datasets = config.datasets.map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            type: ds.type,
+            borderColor: ds.color,
+            backgroundColor: ds.type === 'line' ? ds.color + '10' : ds.color,
+            borderWidth: ds.type === 'line' ? 4 : 0,
+            fill: ds.type === 'line',
+            tension: 0.4,
+            borderDash: ds.dashed ? [5, 5] : [],
+            pointRadius: ds.type === 'line' ? 4 : 0,
+            borderRadius: 8
+        }));
+
+        mainChart.update('active');
+
+        // Update Legend Info
+        const legendContainer = document.getElementById('chart-legend');
+        legendContainer.innerHTML = config.datasets.map(ds => `
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="w-2 h-2 rounded-full" style="background: ${ds.color}"></span>
+                <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">${ds.label}</span>
+                <span class="text-xs font-black text-slate-900 ml-2">${ds.data[ds.data.length - 1]}${type === 'siswa' ? '%' : ''}</span>
+            </div>
+        `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', initChart);
+</script>
+{% endblock %}

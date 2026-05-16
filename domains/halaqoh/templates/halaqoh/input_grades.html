@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Input Nilai Ujian Tahfidz{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8 pb-32">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{{ url_for('halaqoh.list_exams') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-emerald-600 font-bold text-sm mb-6 transition">
+            <i class="fas fa-arrow-left"></i> Kembali ke Jadwal Ujian
+        </a>
+        <div class="flex items-center gap-4 mb-2">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
+                <i class="fas fa-pen-to-square"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-600">Formulir Penilaian</p>
+                <h1 class="text-2xl font-black text-slate-900">{{ exam.title }}</h1>
+            </div>
+        </div>
+        <p class="text-slate-500 font-medium text-sm ml-16">Halaqoh: <strong class="text-slate-700">{{ exam.halaqoh.name if exam.halaqoh else 'Umum' }}</strong></p>
+    </div>
+
+    <!-- Mobile First Cards -->
+    <form action="{{ url_for('halaqoh.input_grades', exam_id=exam.id) }}" method="POST" id="scoreForm" class="space-y-6 relative">
+        
+        {% if students %}
+            {% for student in students %}
+            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <!-- Student Info -->
+                <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-black text-lg">
+                            {{ student.name[0]|upper }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900">{{ student.name }}</h3>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">NISN: {{ student.nisn }}</p>
+                        </div>
+                    </div>
+                    {% if student.final_score %}
+                    <div class="text-right">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Skor Akhir</p>
+                        <p class="text-2xl font-black text-slate-900">{{ student.final_score }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Input Grid -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kelancaran</label>
+                        <input type="number" name="kelancaran_{{ student.id }}" value="{{ student.kelancaran }}" min="0" max="100" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-black text-slate-700 transition text-center" placeholder="0-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tajwid</label>
+                        <input type="number" name="tajwid_{{ student.id }}" value="{{ student.tajwid }}" min="0" max="100" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-black text-slate-700 transition text-center" placeholder="0-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Makhraj</label>
+                        <input type="number" name="makhraj_{{ student.id }}" value="{{ student.makhraj }}" min="0" max="100" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-black text-slate-700 transition text-center" placeholder="0-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Adab</label>
+                        <input type="number" name="adab_{{ student.id }}" value="{{ student.adab }}" min="0" max="100" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-black text-slate-700 transition text-center" placeholder="0-100">
+                    </div>
+                </div>
+
+                <!-- Catatan Tambahan -->
+                <div>
+                    <input type="text" name="note_{{ student.id }}" value="{{ student.note }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium text-slate-600 transition text-sm" placeholder="Catatan tambahan (opsional)">
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white rounded-[3rem] p-12 text-center border border-slate-100">
+                <i class="fas fa-users-slash text-4xl text-slate-300 mb-4"></i>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Tidak Ada Santri</h3>
+                <p class="text-slate-500 font-medium text-sm">Grup halaqoh ini belum memiliki anggota santri satupun.</p>
+            </div>
+        {% endif %}
+
+        <!-- Sticky Save Button -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50 flex justify-center shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <button type="submit" class="w-full max-w-md py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-500/30 hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-save"></i> SIMPAN SEMUA NILAI
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

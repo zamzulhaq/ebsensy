@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Login Guru - E-Absensi & Tahfidz{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-green-50">
+    <div class="glass w-full max-w-md rounded-[2rem] shadow-2xl p-8 transform transition-all hover:scale-[1.01]">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-green-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 transform rotate-3">
+                <i class="fas fa-chalkboard-user text-white text-3xl -rotate-3"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Portal Guru</h1>
+            <p class="text-slate-500 mt-2 font-medium">Silakan masuk menggunakan akun Anda</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" action="{{ url_for('auth.login_guru') }}" class="space-y-5">
+            <!-- Username -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Username / NIP / Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-slate-400"></i>
+                    </div>
+                    <input type="text" name="username" required
+                        class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm font-medium"
+                        placeholder="Masukkan username Anda">
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Kata Laluan</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-slate-400"></i>
+                    </div>
+                    <input type="password" name="password" id="password" required
+                        class="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm font-medium"
+                        placeholder="••••••••">
+                    <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-500 transition-colors">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Button -->
+            <button type="submit" 
+                class="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                <span>Masuk Sekarang</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-sm font-medium text-slate-500">
+            <p>Admin? <a href="{{ url_for('login') }}" class="text-blue-600 hover:text-blue-700 hover:underline">Login disini</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const pwd = document.getElementById('password');
+        const icon = document.getElementById('eyeIcon');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            pwd.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

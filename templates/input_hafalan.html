@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Hafalan: {{ student.name }} - {{ school_name }}{% endblock %}
+
+{% block content %}
+<!-- iOS Header -->
+<div class="ios-header md:hidden">
+    <a href="javascript:history.back()" class="ios-back-btn"><i class="fas fa-chevron-left"></i> Kembali</a>
+    <span class="ios-header-title">{{ student.name }}</span>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 pb-safe" style="padding-top:8px">
+    <!-- Desktop Header -->
+    <div class="hidden md:flex flex-row justify-between items-center mb-10 gap-6 pt-4">
+        <div class="flex items-center gap-5">
+            <div style="width:56px;height:56px;background:#059669;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px">
+                <i class="fas fa-heart-pulse"></i>
+            </div>
+            <div>
+                <p class="font-bold uppercase tracking-widest text-[10px] mb-1" style="color:#059669">Tahfidz · Monitoring Progres</p>
+                <h1 class="text-3xl font-extrabold" style="color:#1C1917">{{ student.name }}</h1>
+            </div>
+        </div>
+        <div>
+            <a href="javascript:history.back()" class="d-btn-secondary">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+        <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-slate-400 text-xs font-black uppercase tracking-widest">Pencapaian Pekan Ini</h3>
+                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase">{{ summary.percent }}% Tercapai</span>
+            </div>
+            <div class="flex items-baseline gap-2 mb-6">
+                <span class="text-5xl font-black text-slate-900">{{ summary.baru_pages }}</span>
+                <span class="text-slate-400 font-bold">/ {{ summary.target }} Halaman</span>
+            </div>
+            <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden mb-3 shadow-inner">
+                <div class="h-full bg-emerald-500 rounded-full transition-all duration-1000 shadow-lg shadow-emerald-500/30" style="width: {{ summary.percent }}%"></div>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">Sisa: {{ summary.remaining }} Halaman untuk mencapai target mingguan</p>
+        </div>
+
+        <div class="grid grid-cols-2 lg:col-span-2 gap-4">
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-center text-center">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Murojaah</p>
+                <p class="text-3xl font-black text-emerald-600">{{ summary.murojaah_pages }} <span class="text-xs text-slate-400">hlm</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-center text-center">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Robert</p>
+                <p class="text-3xl font-black text-amber-600">{{ summary.robert_pages }} <span class="text-xs text-slate-400">hlm</span></p>
+            </div>
+            <div class="bg-emerald-600 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/20 flex flex-col justify-center text-center text-white">
+                <p class="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Total Setoran</p>
+                <p class="text-3xl font-black">{{ summary.baru_count + summary.murojaah_count + summary.robert_count }} <span class="text-xs opacity-60">kali</span></p>
+            </div>
+            <div class="bg-slate-900 p-6 rounded-[2rem] shadow-sm flex flex-col justify-center text-center text-white">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Setoran Baru</p>
+                <p class="text-3xl font-black">{{ summary.baru_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <!-- Input Form -->
+        <div class="lg:col-span-4">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 sticky top-10">
+                <h2 class="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                    <i class="fas fa-feather-pointed text-emerald-600"></i>
+                    Catat Hafalan
+                </h2>
+                
+                <form action="{{ url_for('input_hafalan', student_id=student.id) }}" method="POST" class="space-y-6">
+                    <div class="flex p-1.5 bg-slate-100 rounded-2xl gap-1">
+                        <input type="radio" name="type" value="hafalan_baru" id="t_baru" class="hidden peer/baru" checked>
+                        <label for="t_baru" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl cursor-pointer transition-all peer-checked/baru:bg-emerald-600 peer-checked/baru:text-white text-slate-400">Baru</label>
+                        
+                        <input type="radio" name="type" value="murojaah" id="t_muro" class="hidden peer/muro">
+                        <label for="t_muro" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl cursor-pointer transition-all peer-checked/muro:bg-teal-600 peer-checked/muro:text-white text-slate-400">Murojaah</label>
+                        
+                        <input type="radio" name="type" value="robert" id="t_rob" class="hidden peer/rob">
+                        <label for="t_rob" class="flex-1 text-center py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl cursor-pointer transition-all peer-checked/rob:bg-amber-600 peer-checked/rob:text-white text-slate-400">Robert</label>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Surah</label>
+                        <input type="text" name="surah" required class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-slate-700 transition-all" placeholder="Misal: Al-Baqarah">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Ayat Awal</label>
+                            <input type="number" name="ayat_awal" min="1" required class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-slate-700 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Ayat Akhir</label>
+                            <input type="number" name="ayat_akhir" min="1" required class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-slate-700 transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jumlah Halaman</label>
+                        <input type="number" name="pages_count" min="1" step="1" required class="w-full px-5 py-4 bg-emerald-50 border border-emerald-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-black text-emerald-700 transition-all" value="1">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kualitas Setoran</label>
+                        <select name="kualitas" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-bold text-slate-700 appearance-none transition-all">
+                            <option value="Lancar">🟢 Lancar</option>
+                            <option value="Cukup">🟡 Cukup</option>
+                            <option value="Perlu Mengulang">🔴 Mengulang</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full py-5 bg-emerald-600 text-white font-black rounded-3xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-check-circle"></i> Simpan Setoran
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="lg:col-span-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                <h2 class="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                    <i class="fas fa-history text-emerald-600"></i>
+                    Riwayat Hafalan
+                </h2>
+
+                <div class="space-y-4">
+                    {% if history %}
+                        {% for item in history %}
+                        <div class="group p-6 rounded-[2rem] border border-slate-50 bg-slate-50/30 hover:bg-white hover:border-emerald-100 transition-all relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5 
+                                {% if item.type == 'hafalan_baru' %}bg-emerald-500
+                                {% elif item.type == 'murojaah' %}bg-teal-500
+                                {% else %}bg-amber-500{% endif %}">
+                            </div>
+                            
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest
+                                        {% if item.type == 'hafalan_baru' %}bg-emerald-100 text-emerald-700
+                                        {% elif item.type == 'murojaah' %}bg-teal-100 text-teal-700
+                                        {% else %}bg-amber-100 text-amber-700{% endif %}">
+                                        {{ item.type|replace('_', ' ') }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ item.created_at[:10] }}</span>
+                                </div>
+                                <h4 class="text-xl font-black text-slate-900 mb-1">Surah {{ item.surah }}</h4>
+                                <p class="text-sm font-bold text-slate-400">Ayat {{ item.ayat_start }} - {{ item.ayat_end }} • <span class="text-slate-600">{{ item.pages_count }} Halaman</span></p>
+                                
+                                {% if item.note %}
+                                <div class="mt-4 p-3 bg-white rounded-xl border border-slate-100 text-xs italic text-slate-500 font-medium">
+                                    "{{ item.note }}"
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex flex-col items-end gap-4 min-w-[120px]">
+                                <span class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest
+                                    {% if item.kualitas == 'Lancar' %}bg-emerald-50 text-emerald-600 border border-emerald-100
+                                    {% elif item.kualitas == 'Cukup' %}bg-amber-50 text-amber-600 border border-amber-100
+                                    {% else %}bg-rose-50 text-rose-600 border border-rose-100{% endif %}">
+                                    {{ item.kualitas }}
+                                </span>
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                    <a href="#" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all border border-transparent">
+                                        <i class="fas fa-edit text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="py-24 text-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200 mx-auto mb-6 shadow-inner">
+                                <i class="fas fa-scroll text-4xl"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-900">Belum Ada Setoran</h3>
+                            <p class="text-slate-400 text-sm font-medium">Riwayat hafalan santri akan muncul di sini.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

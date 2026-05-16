@@ -1,0 +1,231 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Input Absensi {{ subject_name }} - {{ class_name }}{% endblock %}
+{% block header_title %}Absensi Mata Pelajaran{% endblock %}
+
+{% block head %}
+<style>
+    /* ... existing styles ... */
+    .attendance-radio {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .attendance-option {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .attendance-option.is-active[data-status="Hadir"] {
+        background: #10B981 !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    .attendance-option.is-active[data-status="Sakit"] {
+        background: #F59E0B !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    }
+
+    .attendance-option.is-active[data-status="Izin"] {
+        background: #3B82F6 !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    }
+
+    .attendance-option.is-active[data-status="Alfa"] {
+        background: #F43F5E !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+
+    <!-- Form -->
+    <form action="{{ url_for('academic.input_absensi', class_id=class_id, subject_id=subject_id, date=today) }}" method="POST" class="space-y-6">
+        
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mata Pelajaran</p>
+                    <p class="font-black text-slate-900 leading-tight">{{ subject_name }}</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hari & Tanggal</p>
+                    <p class="font-black text-slate-900 leading-tight">{{ today }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Kehadiran: <span class="text-blue-600">{{ class_name }}</span></h2>
+            <button type="button" onclick="markAll('Hadir')" class="px-6 py-3 bg-emerald-50 text-emerald-600 rounded-2xl font-bold hover:bg-emerald-100 transition flex items-center gap-2 border border-emerald-100">
+                <i class="fas fa-check-double"></i> Tandai Semua Hadir
+            </button>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mb-8">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-20">No</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Siswa</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status Kehadiran</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for student in students %}
+                    {% set current_status = existing_att.get(student.id|string, '') %}
+                    {% set display_status = current_status if current_status else 'Hadir' %}
+                    <tr class="hover:bg-slate-50/30 transition-colors">
+                        <td class="px-8 py-5 text-sm font-bold text-slate-400">{{ loop.index }}</td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center font-black text-blue-600 text-sm">
+                                    {{ student.name[0] }}
+                                </div>
+                                <span class="font-black text-slate-900">{{ student.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex justify-center gap-2">
+                                <div class="bg-slate-100/50 p-1 rounded-2xl flex gap-1 border border-slate-200/50">
+                                    <input type="radio" name="status_{{ student.id }}" value="Hadir" id="d_h_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Hadir' %}checked{% endif %}>
+                                    <label for="d_h_{{ student.id }}" class="attendance-option px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400" data-status="Hadir">Hadir</label>
+
+                                    <input type="radio" name="status_{{ student.id }}" value="Sakit" id="d_s_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Sakit' %}checked{% endif %}>
+                                    <label for="d_s_{{ student.id }}" class="attendance-option px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400" data-status="Sakit">Sakit</label>
+
+                                    <input type="radio" name="status_{{ student.id }}" value="Izin" id="d_i_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Izin' %}checked{% endif %}>
+                                    <label for="d_i_{{ student.id }}" class="attendance-option px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400" data-status="Izin">Izin</label>
+
+                                    <input type="radio" name="status_{{ student.id }}" value="Alfa" id="d_a_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Alfa' %}checked{% endif %}>
+                                    <label for="d_a_{{ student.id }}" class="attendance-option px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400" data-status="Alfa">Alfa</label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile List View -->
+        <div class="md:hidden space-y-4 pb-32">
+            {% for student in students %}
+            {% set current_status = existing_att.get(student.id|string, '') %}
+            {% set display_status = current_status if current_status else 'Hadir' %}
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-4 mb-5">
+                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center font-black text-blue-600">
+                        {{ student.name[0] }}
+                    </div>
+                    <span class="font-black text-slate-900">{{ student.name }}</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <input type="radio" name="status_{{ student.id }}" value="Hadir" id="m_h_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Hadir' %}checked{% endif %}>
+                    <label for="m_h_{{ student.id }}" class="attendance-option text-center py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 transition-all" data-status="Hadir">Hadir</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Sakit" id="m_s_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Sakit' %}checked{% endif %}>
+                    <label for="m_s_{{ student.id }}" class="attendance-option text-center py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 transition-all" data-status="Sakit">Sakit</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Izin" id="m_i_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Izin' %}checked{% endif %}>
+                    <label for="m_i_{{ student.id }}" class="attendance-option text-center py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 transition-all" data-status="Izin">Izin</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Alfa" id="m_a_{{ student.id }}" class="attendance-radio" data-original="{{ current_status }}" {% if display_status == 'Alfa' %}checked{% endif %}>
+                    <label for="m_a_{{ student.id }}" class="attendance-option text-center py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-400 transition-all" data-status="Alfa">Alfa</label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Submit Button -->
+        <div class="fixed md:relative bottom-0 left-0 right-0 p-4 md:p-0 bg-white/80 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border-t md:border-0 border-slate-100 z-50">
+            <button type="submit" class="w-full md:w-auto px-12 py-5 bg-blue-600 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-blue-500/30 hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3">
+                <i class="fas fa-cloud-arrow-up text-xl"></i> Simpan Laporan Absensi
+            </button>
+        </div>
+    </form>
+    </div>
+</div>
+
+<script>
+    function syncAttendanceOptions() {
+        const checkedMap = {};
+        document.querySelectorAll('input[type="radio"][name^="status_"]:checked').forEach(radio => {
+            const studentId = radio.name.replace('status_', '');
+            checkedMap[studentId] = radio.value;
+        });
+
+        document.querySelectorAll('input[type="radio"][name^="status_"]').forEach(radio => {
+            const studentId = radio.name.replace('status_', '');
+            const labels = document.querySelectorAll(`label[for="${radio.id}"]`);
+            labels.forEach(label => {
+                label.classList.toggle('is-active', checkedMap[studentId] === radio.value);
+            });
+        });
+    }
+
+    function markAll(status) {
+        const radios = document.querySelectorAll(`input[value="${status}"]`);
+        radios.forEach(radio => {
+            radio.checked = true;
+        });
+        syncAttendanceOptions();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="radio"][name^="status_"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const original = radio.getAttribute('data-original');
+                // If it had an original value and it's different from the new value
+                if (original && original !== radio.value) {
+                    if (!confirm(`Ubah data absen dari ${original} menjadi ${radio.value}?`)) {
+                        // Revert to original
+                        e.preventDefault();
+                        const originalRadio = document.querySelector(`input[name="${radio.name}"][value="${original}"]`);
+                        if (originalRadio) {
+                            originalRadio.checked = true;
+                        } else {
+                            radio.checked = false;
+                        }
+                        syncAttendanceOptions();
+                        return;
+                    }
+                }
+                syncAttendanceOptions();
+            });
+        });
+        document.querySelectorAll('.attendance-option').forEach(label => {
+            label.addEventListener('click', (e) => {
+                const radio = document.getElementById(label.getAttribute('for'));
+                if (radio && !radio.checked) {
+                    // We let the change event handle the confirm dialog
+                    radio.checked = true;
+                    const event = new Event('change', { bubbles: true });
+                    radio.dispatchEvent(event);
+                }
+            });
+        });
+        syncAttendanceOptions();
+    });
+</script>
+{% endblock %}

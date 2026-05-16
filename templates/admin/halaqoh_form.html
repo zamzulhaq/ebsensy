@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Tambah' if mode == 'create' else 'Edit' }} Halaqoh - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+    <div class="max-w-md w-full bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+        <div class="bg-indigo-600 p-8 text-center text-white">
+            <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                <i class="fas {{ 'fa-plus' if mode == 'create' else 'fa-edit' }} text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-black">{{ 'Tambah' if mode == 'create' else 'Edit' }} Grup Halaqoh</h1>
+            <p class="text-indigo-100 text-sm mt-1">Kelola data grup Tahfidz sekolah</p>
+        </div>
+
+        <form action="{{ url_for('create_halaqoh') if mode == 'create' else url_for('edit_halaqoh', id=halaqoh.id) }}" method="POST" class="p-8 space-y-6">
+            {% if not teachers and mode == 'create' %}
+            <div class="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
+                <i class="fas fa-exclamation-triangle text-amber-500 mb-2 text-xl"></i>
+                <p class="text-amber-800 text-xs font-bold">Belum ada guru halaqoh. <br>Tambahkan guru dengan tipe 'Halaqoh' terlebih dahulu.</p>
+                <a href="{{ url_for('tambah_guru') }}" class="inline-block mt-3 text-indigo-600 font-bold text-xs hover:underline">Tambah Guru Sekarang</a>
+            </div>
+            {% else %}
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Grup</label>
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="text" name="name" value="{{ halaqoh.name if halaqoh else '' }}" placeholder="Contoh: Abu Bakar" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Musyrif / Guru Halaqoh</label>
+                <div class="relative">
+                    <i class="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <select name="teacher_id" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 transition" required>
+                        <option value="">-- Pilih Guru --</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if halaqoh and halaqoh.teacher_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2">*Hanya guru dengan tipe 'Halaqoh' yang muncul di daftar.</p>
+            </div>
+
+            <div class="pt-4 flex flex-col gap-3">
+                <button type="submit" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                    {{ 'Buat Grup Sekarang' if mode == 'create' else 'Simpan Perubahan' }}
+                </button>
+                {% endif %}
+                <a href="{{ url_for('list_halaqoh') }}" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition text-center">
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

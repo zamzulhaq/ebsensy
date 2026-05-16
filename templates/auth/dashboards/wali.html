@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Wali - Ebsensy{% endblock %}
+{% block content %}
+<div class="p-8">
+    <h1 class="text-2xl font-bold">Dashboard Wali Murid</h1>
+    <p>Pantau perkembangan akademik dan hafalan putra-putri Anda.</p>
+    <a href="{{ url_for('wali.dashboard') }}" class="mt-4 inline-block px-4 py-2 bg-orange-600 text-white rounded">Masuk ke Portal Wali</a>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Santri - {{ halaqoh.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+        <div class="flex items-center gap-5">
+            <div class="w-16 h-16 bg-violet-600 rounded-[2rem] flex items-center justify-center text-white text-2xl shadow-xl shadow-violet-500/20">
+                <i class="fas fa-users-gear"></i>
+            </div>
+            <div>
+                <p class="text-violet-600 font-bold uppercase tracking-widest text-[10px] mb-1">Manajemen Halaqoh</p>
+                <h1 class="text-3xl font-black text-slate-900 leading-tight">Kelola Anggota: {{ halaqoh.name }}</h1>
+            </div>
+        </div>
+        <a href="{{ url_for('list_halaqoh') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- PANEL KIRI: SEMUA SISWA -->
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[75vh]">
+            <div class="p-8 border-b border-slate-50">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-black text-slate-900 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
+                            <i class="fas fa-database"></i>
+                        </span>
+                        Daftar Seluruh Siswa
+                    </h2>
+                    <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-tighter">{{ available_students|length }} Tersedia</span>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="text" id="searchAvailable" placeholder="Cari nama siswa..." class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500 transition-all text-sm font-medium">
+                </div>
+            </div>
+            
+            <div class="overflow-y-auto flex-1 p-4 space-y-2">
+                {% for s in available_students %}
+                <div class="available-item flex items-center justify-between p-4 hover:bg-violet-50 rounded-2xl transition-all group border border-transparent hover:border-violet-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center font-black text-sm group-hover:bg-white group-hover:text-violet-600 shadow-inner">
+                            {{ s.name[:1] }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm">{{ s.name }}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">NISN: {{ s.nisn or '-' }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('manage_halaqoh_students', id=halaqoh_id) }}" method="POST">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="student_id" value="{{ s.id }}">
+                        <button type="submit" class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-600 hover:text-white flex items-center justify-center transition-all shadow-sm">
+                            <i class="fas fa-plus text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+                
+                {% if not available_students %}
+                <div class="py-20 text-center">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mx-auto mb-4">
+                        <i class="fas fa-check-double text-2xl"></i>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium">Semua siswa sudah terdaftar dalam halaqoh.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PANEL KANAN: SISWA HALAQOH -->
+        <div class="bg-violet-600 rounded-[2.5rem] shadow-xl shadow-violet-500/20 overflow-hidden flex flex-col h-[75vh]">
+            <div class="p-8 border-b border-white/10">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-black text-white flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center text-xs">
+                            <i class="fas fa-star"></i>
+                        </span>
+                        Anggota Halaqoh
+                    </h2>
+                    <span class="px-3 py-1 bg-white/20 text-white rounded-lg text-[10px] font-black uppercase tracking-tighter">{{ in_students|length }} Santri</span>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-white/30"></i>
+                    <input type="text" id="searchIn" placeholder="Cari di grup ini..." class="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-white/20 transition-all text-sm text-white placeholder:text-white/40 font-medium">
+                </div>
+            </div>
+
+            <div class="overflow-y-auto flex-1 p-4 space-y-2">
+                {% for s in in_students %}
+                <div class="in-item flex items-center justify-between p-4 bg-white/10 border border-white/5 rounded-2xl transition-all hover:bg-white/20">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-white text-violet-600 flex items-center justify-center font-black text-sm shadow-lg">
+                            {{ s.name[:1] }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-white text-sm">{{ s.name }}</p>
+                            <p class="text-[10px] text-white/50 font-bold uppercase tracking-tighter">NISN: {{ s.nisn or '-' }}</p>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('manage_halaqoh_students', id=halaqoh_id) }}" method="POST">
+                        <input type="hidden" name="action" value="remove">
+                        <input type="hidden" name="student_id" value="{{ s.id }}">
+                        <button type="submit" class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-100 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all shadow-sm">
+                            <i class="fas fa-trash-can text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+
+                {% if not in_students %}
+                <div class="py-20 text-center">
+                    <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/10 mx-auto mb-4">
+                        <i class="fas fa-users-slash text-2xl"></i>
+                    </div>
+                    <p class="text-white/40 text-sm font-medium">Belum ada santri dalam halaqoh ini.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="p-6 bg-slate-950/20 border-t border-white/5 text-center">
+                <p class="text-white/40 text-[10px] font-black uppercase tracking-widest">Update Data Real-time</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setupSearch(inputId, itemClass) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        input.addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let items = document.querySelectorAll('.' + itemClass);
+            
+            items.forEach(item => {
+                let name = item.querySelector('p').textContent.toLowerCase();
+                if (name.includes(filter)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    setupSearch('searchAvailable', 'available-item');
+    setupSearch('searchIn', 'in-item');
+</script>
+{% endblock %}

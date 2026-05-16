@@ -1,0 +1,71 @@
+{% extends 'layouts/base_dashboard.html' %}
+
+{% block title %}Input Nilai: {{ exam.title }} - E-Absensi & Tahfidz{% endblock %}
+{% block header_title %}Input Nilai Siswa{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <!-- Info Box -->
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 flex items-start gap-4">
+        <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
+        <div>
+            <p class="text-blue-900 font-bold text-sm">Panduan Input Cepat</p>
+            <p class="text-blue-700 text-xs mt-1">Nilai maksimal 100. Kosongkan nilai jika siswa tidak mengikuti ujian. Klik "Simpan Semua Nilai" di bagian bawah layar saat selesai.</p>
+        </div>
+    </div>
+
+    <!-- Form Input Nilai -->
+    <form method="POST" action="" id="scoreForm">
+        <div class="space-y-4">
+            {% for student in students %}
+            <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    
+                    <!-- Student Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center font-black text-lg">
+                            {{ loop.index }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900 text-lg leading-tight">{{ student.name }}</p>
+                            <p class="text-xs font-bold text-slate-400 mt-0.5 tracking-wider">NISN: {{ student.nisn or '-' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-24">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1 sm:hidden">Nilai</label>
+                            <input type="number" name="score_{{ student.id }}" value="{{ student.current_score }}" min="0" max="100" step="0.01"
+                                class="w-full text-center font-black text-xl px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all text-blue-700 placeholder:text-slate-300 placeholder:font-normal placeholder:text-sm"
+                                placeholder="0-100">
+                        </div>
+                        <div class="flex-1 sm:w-48">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1 sm:hidden">Catatan (Opsional)</label>
+                            <input type="text" name="note_{{ student.id }}" value="{{ student.current_note }}"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all text-sm font-medium placeholder:text-slate-400"
+                                placeholder="Catatan...">
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <p class="text-slate-500 font-bold">Tidak ada siswa di kelas ini.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sticky Save Button (Mobile & Desktop) -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50 flex justify-center">
+            <button type="submit" class="w-full max-w-md py-4 bg-slate-900 text-white font-black text-lg rounded-2xl hover:bg-blue-600 hover:-translate-y-1 transition-all shadow-2xl shadow-slate-900/20 flex items-center justify-center gap-3">
+                <i class="fas fa-save text-xl"></i> SIMPAN SEMUA NILAI
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

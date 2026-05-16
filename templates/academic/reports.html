@@ -1,0 +1,138 @@
+{% extends 'layouts/base_dashboard.html' %}
+
+{% block title %}Raport & Ranking Akademik - E-Absensi & Tahfidz{% endblock %}
+{% block header_title %}Laporan Akademik{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Back Button -->
+    <!-- Filter Section -->
+
+    <!-- Filter Section -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 mb-10">
+        <form method="GET" action="" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Kelas</label>
+                <select name="class_id" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all font-bold text-slate-700">
+                    <option value="">Pilih Kelas</option>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}" {% if class_id|string == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Tahun Ajaran</label>
+                <input type="text" name="academic_year" value="{{ academic_year or '2025/2026' }}" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all font-bold text-slate-700">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Semester</label>
+                <select name="semester" required class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all font-bold text-slate-700">
+                    <option value="1" {% if semester|string == '1' %}selected{% endif %}>Ganjil (1)</option>
+                    <option value="2" {% if semester|string == '2' %}selected{% endif %}>Genap (2)</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" name="view_type" value="report" class="flex-1 py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-md flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-file-lines"></i> Raport
+                </button>
+                <button type="submit" name="view_type" value="ranking" class="flex-1 py-3.5 bg-blue-50 text-blue-600 font-bold rounded-xl border border-blue-100 hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-trophy"></i> Peringkat
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    {% if results %}
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-900">
+                    {% if view_type == 'ranking' %}Peringkat Kelas{% else %}Raport Akademik{% endif %}
+                </h2>
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 font-bold text-[10px] uppercase tracking-widest rounded-lg">Semester {{ semester }}</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-white">
+                            {% if view_type == 'ranking' %}
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Peringkat</th>
+                            {% endif %}
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Siswa</th>
+                            {% if view_type == 'report' %}
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Mata Pelajaran</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Nilai Akhir</th>
+                            {% else %}
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Rata-rata Kelas</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Total Nilai</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for row in results %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            {% if view_type == 'ranking' %}
+                            <td class="px-6 py-4 text-center">
+                                {% if row.rank == 1 %}
+                                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center font-black text-sm mx-auto shadow-sm"><i class="fas fa-trophy text-xs"></i></div>
+                                {% elif row.rank == 2 %}
+                                <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-black text-sm mx-auto shadow-sm">2</div>
+                                {% elif row.rank == 3 %}
+                                <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center font-black text-sm mx-auto shadow-sm">3</div>
+                                {% else %}
+                                <div class="w-8 h-8 rounded-full bg-transparent text-slate-400 flex items-center justify-center font-bold text-sm mx-auto">{{ row.rank }}</div>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                            
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-slate-900">{{ row.student_name }}</p>
+                                {% if view_type == 'ranking' %}
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">{{ row.nisn or '-' }}</p>
+                                {% endif %}
+                            </td>
+
+                            {% if view_type == 'report' %}
+                            <td class="px-6 py-4">
+                                <span class="font-semibold text-slate-700">{{ row.subject_name }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 bg-slate-100 text-slate-800 font-black rounded-lg">{{ "%.2f"|format(row.final_score|float) if row.final_score else '-' }}</span>
+                            </td>
+                            {% else %}
+                            <td class="px-6 py-4 text-center">
+                                <span class="font-black text-slate-700">{{ "%.2f"|format(row.average_score|float) if row.average_score else '-' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="font-black text-blue-600">{{ "%.2f"|format(row.total_score|float) if row.total_score else '-' }}</span>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% elif class_id %}
+        <div class="bg-white rounded-[2.5rem] p-12 text-center shadow-sm border border-slate-100 flex flex-col items-center">
+            <div class="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mb-6 shadow-inner">
+                <i class="fas fa-folder-open text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-900">Data Kosong</h3>
+            <p class="text-slate-500 font-medium mt-2">Tidak ada data raport atau nilai yang ditemukan untuk kriteria pencarian ini.</p>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-[2.5rem] p-12 text-center shadow-sm border border-slate-100 flex flex-col items-center border-dashed border-2">
+            <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center text-blue-400 mb-6">
+                <i class="fas fa-search text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-slate-900">Pilih Filter</h3>
+            <p class="text-slate-500 font-medium mt-2">Gunakan filter di atas untuk melihat raport atau peringkat siswa.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Detail Kelas {{ class_name }} - ERP Tahfidz Premium{% endblock %}
+{% block header_title %}Detail Kelas{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8 pb-12">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <a href="{{ url_for('academic.my_classes') }}" class="hover:text-blue-600 transition-colors">Kelas Saya</a>
+        <i class="fas fa-chevron-right text-[8px]"></i>
+        <span class="text-slate-900">{{ class_name }}</span>
+    </nav>
+
+    <!-- Class Header Info -->
+    <div class="relative overflow-hidden bg-slate-900 p-10 rounded-[3rem] shadow-2xl shadow-slate-900/20 text-white">
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-blue-500/20">
+                        {{ subject_name }}
+                    </span>
+                    <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
+                        {{ student_count }} Santri
+                    </span>
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black tracking-tight mb-2">{{ class_name }}</h1>
+                <p class="text-slate-400 font-bold">Kelola administrasi kelas dan pantau perkembangan santri Anda.</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-2xl border border-white/10">
+                    <i class="fas fa-users text-blue-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decoration -->
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Action Buttons Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Input Absensi -->
+        <a href="{{ url_for('academic.input_absensi', class_id=class_id, subject_id=subject_id) }}" 
+           class="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-1">Input Absensi</h3>
+            <p class="text-[10px] font-bold text-slate-400">Catat kehadiran hari ini</p>
+        </a>
+
+        <!-- History Absensi -->
+        <a href="{{ url_for('academic.absensi_sessions', class_id=class_id, subject_id=subject_id) }}" 
+           class="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 text-xl mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                <i class="fas fa-history"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-1">History Absensi</h3>
+            <p class="text-[10px] font-bold text-slate-400">Lihat rekap kehadiran</p>
+        </a>
+
+        <!-- Input Nilai -->
+        <a href="{{ url_for('academic.create_exam', class_id=class_id, subject_id=subject_id) }}" 
+           class="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 text-xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-1">Input Nilai</h3>
+            <p class="text-[10px] font-bold text-slate-400">Masukkan nilai ujian/tugas</p>
+        </a>
+
+        <!-- Rekap Nilai -->
+        <a href="{{ url_for('academic.list_exams') }}" 
+           class="group bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300">
+            <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-xl mb-6 group-hover:bg-amber-600 group-hover:text-white transition-all">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-1">Rekap Nilai</h3>
+            <p class="text-[10px] font-bold text-slate-400">Lihat laporan akademik</p>
+        </a>
+    </div>
+
+    <!-- Student List Section -->
+    <div class="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-10 py-10 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Santri</h2>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Total {{ student_count }} santri terdaftar di kelas ini</p>
+            </div>
+            <div class="relative w-full md:w-72">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input type="text" id="studentSearch" placeholder="Cari santri..." 
+                       class="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-blue-500/20 transition-all">
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">No</th>
+                        <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Santri</th>
+                        <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">NISN</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    {% for student in students %}
+                    <tr class="border-b border-slate-50 hover:bg-blue-50/30 transition-colors group">
+                        <td class="px-10 py-6 text-xs font-bold text-slate-400">{{ loop.index }}</td>
+                        <td class="px-6 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-black text-xs group-hover:bg-blue-100 group-hover:text-blue-600 transition-all">
+                                    {{ student.name[:1] }}
+                                </div>
+                                <span class="text-sm font-black text-slate-900">{{ student.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-6 text-xs font-bold text-slate-500">{{ student.nisn }}</td>
+                        <td class="px-10 py-6 text-right">
+                            <button class="px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
+                                Profil
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('studentSearch').addEventListener('keyup', function() {
+        const value = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#studentTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Penugasan Guru | Academic ERP{% endblock %}
+{% block header_title %}Penugasan Guru{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Breadcrumb & Action -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-blue-600">Penugasan Guru</span>
+        </div>
+        <button onclick="document.getElementById('addModal').classList.remove('hidden')" 
+                class="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-xs shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+            <i class="fas fa-plus"></i> Tambah Penugasan
+        </button>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between gap-4 items-center">
+            <div class="relative w-full md:w-96">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" placeholder="Cari guru atau mapel..." 
+                       class="w-full pl-12 pr-6 py-4 bg-slate-50 border-transparent rounded-2xl font-bold text-slate-600 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all outline-none">
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden md:block">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Penugasan</p>
+                    <p class="text-xl font-black text-blue-600">{{ assignments|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Guru Pengajar</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Mata Pelajaran</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Kelas</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for asn in assignments %}
+                    <tr class="group hover:bg-blue-50/20 transition-all duration-300">
+                        <td class="px-10 py-6">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-blue-500/10">
+                                        {{ asn.teachers.name[0] }}
+                                    </div>
+                                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
+                                </div>
+                                <div>
+                                    <p class="font-black text-slate-900 group-hover:text-blue-600 transition-colors">{{ asn.teachers.name }}</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">NIP: {{ asn.teachers.nip or '---' }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-10 py-6 text-center">
+                            <span class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest border border-indigo-100/50">
+                                {{ asn.subjects.name }}
+                            </span>
+                        </td>
+                        <td class="px-10 py-6 text-center">
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-black">
+                                <i class="fas fa-door-open text-[10px]"></i>
+                                {{ asn.classes.name }}
+                            </div>
+                        </td>
+                        <td class="px-10 py-6 text-right">
+                            <div class="flex justify-end gap-2">
+                                <form action="{{ url_for('academic.manage_assignments') }}" method="POST" onsubmit="return confirm('Hapus penugasan ini?')">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{ asn.id }}">
+                                    <button type="submit" class="w-11 h-11 rounded-2xl bg-white border border-slate-100 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 shadow-sm transition-all flex items-center justify-center">
+                                        <i class="fas fa-trash-alt text-sm"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-10 py-32 text-center">
+                            <div class="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200 mx-auto mb-6">
+                                <i class="fas fa-users-slash text-4xl"></i>
+                            </div>
+                            <h3 class="text-xl font-black text-slate-900 mb-2">Belum Ada Penugasan</h3>
+                            <p class="text-slate-400 font-bold max-w-xs mx-auto">Klik tombol "Tambah Penugasan" untuk mulai mengatur pengajar per mata pelajaran.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Assignment Modal -->
+<div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] hidden flex items-center justify-center p-6">
+    <div class="bg-white rounded-[4rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="relative p-12">
+            <button onclick="document.getElementById('addModal').classList.add('hidden')" 
+                    class="absolute top-10 right-10 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="mb-10">
+                <div class="w-16 h-16 bg-blue-600 rounded-[1.5rem] flex items-center justify-center text-white text-2xl shadow-xl shadow-blue-500/20 mb-6">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 class="text-3xl font-black text-slate-900 leading-tight">Tambah Penugasan<br>Guru & Mapel</h3>
+                <p class="text-slate-400 font-bold mt-2">Hubungkan guru dengan mata pelajaran dan kelas yang sesuai.</p>
+            </div>
+
+            <form action="{{ url_for('academic.manage_assignments') }}" method="POST" class="space-y-8">
+                <input type="hidden" name="action" value="add">
+                
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Pilih Guru Pengajar</label>
+                        <div class="relative">
+                            <i class="fas fa-user-tie absolute left-5 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                            <select name="teacher_id" class="w-full pl-12 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-3xl font-bold text-slate-900 focus:bg-white focus:ring-0 focus:border-blue-600 transition-all outline-none appearance-none" required>
+                                <option value="">-- Cari Nama Guru --</option>
+                                {% for guru in guru_list %}
+                                <option value="{{ guru.id }}">{{ guru.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Mata Pelajaran</label>
+                            <div class="relative">
+                                <i class="fas fa-book-open absolute left-5 top-1/2 -translate-y-1/2 text-indigo-500"></i>
+                                <select name="subject_id" class="w-full pl-12 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-3xl font-bold text-slate-900 focus:bg-white focus:ring-0 focus:border-indigo-600 transition-all outline-none appearance-none" required>
+                                    <option value="">-- Mapel --</option>
+                                    {% for s in subjects %}
+                                    <option value="{{ s.id }}">{{ s.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Kelas</label>
+                            <div class="relative">
+                                <i class="fas fa-door-open absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500"></i>
+                                <select name="class_id" class="w-full pl-12 pr-6 py-5 bg-slate-50 border-2 border-transparent rounded-3xl font-bold text-slate-900 focus:bg-white focus:ring-0 focus:border-emerald-600 transition-all outline-none appearance-none" required>
+                                    <option value="">-- Kelas --</option>
+                                    {% for c in classes %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-6 bg-blue-600 text-white rounded-[2.5rem] font-black text-xl shadow-2xl shadow-blue-500/30 hover:bg-blue-700 hover:-translate-y-1 active:translate-y-0 transition-all">
+                        Konfirmasi Penugasan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

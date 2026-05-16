@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Tambah' if mode == 'create' else 'Edit' }} Target Mingguan - {{ school_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 flex items-center justify-center p-6 py-12 md:py-20">
+    <div class="max-w-xl w-full">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-violet-600 p-10 text-center relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full"></div>
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4 relative z-10">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white relative z-10">{{ 'Tambah' if mode == 'create' else 'Edit' }} Target Pekanan</h2>
+                <p class="text-violet-100 text-sm font-medium relative z-10">Tentukan standar capaian hafalan santri.</p>
+            </div>
+
+            <!-- Form -->
+            <form action="{{ url_for('create_weekly_target') if mode == 'create' else url_for('edit_weekly_target', id=target.id) }}" method="POST" class="p-10 space-y-6">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Pilih Kelas</label>
+                        <div class="relative">
+                            <i class="fas fa-graduation-cap absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                            <select name="class_id" required
+                                class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-bold text-slate-700 appearance-none">
+                                <option value="">-- Pilih Kelas --</option>
+                                {% for c in classes %}
+                                <option value="{{ c.id }}" {% if target and target.class_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Minggu Mulai (Senin)</label>
+                        <div class="relative">
+                            <i class="fas fa-calendar-day absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                            <input type="date" name="week_start" required value="{{ target.week_start if target else '' }}"
+                                class="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-bold text-slate-700">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2 ml-1 italic font-medium">*Sistem akan menghitung progres selama 7 hari sejak tanggal ini.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Target Capaian (Halaman)</label>
+                        <div class="relative">
+                            <i class="fas fa-book absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                            <input type="number" name="target_pages" min="1" required value="{{ target.target_pages if target else '5' }}"
+                                class="w-full pl-12 pr-5 py-4 bg-violet-50 border border-violet-100 rounded-2xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all font-black text-violet-700"
+                                placeholder="Jumlah halaman per siswa">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-3 pt-6">
+                    <button type="submit" class="flex-1 py-4 bg-violet-600 text-white font-black rounded-2xl shadow-xl shadow-violet-500/20 hover:bg-violet-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> {{ 'Simpan Target' if mode == 'create' else 'Perbarui Target' }}
+                    </button>
+                    <a href="{{ url_for('manage_weekly_targets') }}" class="md:w-1/3 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-center">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

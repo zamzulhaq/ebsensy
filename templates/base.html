@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}E-Absensi & Tahfidz{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ─── GLOBAL ─── */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background-color: #FAFAF9;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── ANIMATIONS ─── */
+        .alert-animate { animation: slideIn 0.4s cubic-bezier(.17,.67,.35,1) forwards; }
+        @keyframes slideIn { from { transform: translateY(-16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f5f5f5 25%, #ebebeb 50%, #f5f5f5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ─── MOBILE (< 768px) — iOS-style ─── */
+        @media (max-width: 767px) {
+            body { background-color: #F2F2F7; }
+
+            /* iOS-style card */
+            .ios-card {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+            }
+
+            /* iOS grouped list */
+            .ios-list-item {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 14px 16px;
+                background: #fff;
+                border-bottom: 1px solid #E5E5EA;
+            }
+            .ios-list-item:last-child { border-bottom: none; }
+            .ios-chevron::after { content: "›"; font-size: 20px; color: #C7C7CC; font-weight: 400; }
+
+            /* iOS-style input */
+            .ios-input {
+                width: 100%;
+                background: #F2F2F7;
+                border: none;
+                border-radius: 12px;
+                padding: 14px 16px;
+                font-size: 16px; /* prevents iOS zoom */
+                font-family: inherit;
+                color: #1C1C1E;
+                outline: none;
+                transition: box-shadow .2s;
+            }
+            .ios-input:focus { box-shadow: 0 0 0 3px rgba(245,158,11,.25); }
+
+            /* iOS-style CTA button */
+            .ios-btn-primary {
+                width: 100%;
+                height: 52px;
+                background: #F59E0B;
+                color: #fff;
+                font-weight: 600;
+                font-size: 16px;
+                border-radius: 14px;
+                border: none;
+                cursor: pointer;
+                transition: transform .15s, opacity .15s;
+                display: flex; align-items: center; justify-content: center; gap: 8px;
+            }
+            .ios-btn-primary:active { transform: scale(0.97); opacity: .85; }
+            .ios-btn-danger {
+                background: #FF3B30;
+            }
+
+            /* Bottom safe area padding */
+            .pb-safe { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+
+            /* Bottom nav */
+            .bottom-nav {
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+                background: rgba(255,255,255,.92);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border-top: 1px solid rgba(0,0,0,.08);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                display: flex;
+            }
+            .bottom-nav-item {
+                flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                padding: 8px 4px;
+                color: #8E8E93;
+                text-decoration: none;
+                font-size: 10px; font-weight: 600;
+                gap: 3px;
+                transition: color .15s;
+            }
+            .bottom-nav-item.active, .bottom-nav-item:active { color: #F59E0B; }
+            .bottom-nav-item i { font-size: 22px; }
+
+            /* iOS Header bar */
+            .ios-header {
+                position: sticky; top: 0; z-index: 40;
+                background: rgba(242,242,247,.92);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border-bottom: 1px solid rgba(0,0,0,.06);
+                display: flex; align-items: center; justify-content: center;
+                padding: 0 16px;
+                height: 52px;
+                padding-top: env(safe-area-inset-top, 0px);
+            }
+            .ios-header-title {
+                font-size: 17px; font-weight: 700; color: #1C1C1E; text-align: center;
+            }
+            .ios-back-btn {
+                position: absolute; left: 16px;
+                color: #F59E0B; font-size: 15px; font-weight: 500;
+                display: flex; align-items: center; gap: 4px;
+                text-decoration: none;
+            }
+            .ios-header-action {
+                position: absolute; right: 16px;
+                color: #F59E0B; font-size: 15px; font-weight: 600;
+                text-decoration: none;
+            }
+
+            /* Badge pill */
+            .badge-hadir   { background:#D1FAE5; color:#065F46; }
+            .badge-alfa    { background:#FEE2E2; color:#991B1B; }
+            .badge-sakit   { background:#FEF3C7; color:#92400E; }
+            .badge-izin    { background:#DBEAFE; color:#1E40AF; }
+            .badge { border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+
+            /* Sidebar hidden on mobile */
+            .desktop-sidebar { display: none !important; }
+            .mobile-only { display: flex !important; }
+        }
+
+        /* ─── DESKTOP (≥ 768px) ─── */
+        @media (min-width: 768px) {
+            body { background-color: #FAFAF9; }
+
+            /* Desktop sidebar */
+            .desktop-sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0;
+                width: 260px;
+                background: #1C1917;
+                display: flex; flex-direction: column;
+                z-index: 30;
+                overflow-y: auto;
+            }
+            .desktop-sidebar-item {
+                display: flex; align-items: center; gap: 12px;
+                padding: 11px 16px;
+                border-radius: 10px;
+                font-size: 14px; font-weight: 500;
+                color: #A8A29E;
+                text-decoration: none;
+                transition: all .2s;
+                margin: 1px 0;
+            }
+            .desktop-sidebar-item:hover {
+                background: #292524; color: #fff;
+            }
+            .desktop-sidebar-item.active {
+                background: #FEF3C7;
+                color: #92400E;
+                font-weight: 700;
+                border-right: 2px solid #F59E0B;
+            }
+            .desktop-sidebar-item i { width: 18px; text-align: center; font-size: 15px; }
+
+            /* Main content offset for fixed sidebar */
+            .with-sidebar { margin-left: 260px; }
+
+            /* Desktop card */
+            .desktop-card {
+                background: #fff;
+                border: 1px solid #E7E5E4;
+                border-radius: 16px;
+                box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+            }
+
+            /* Desktop table */
+            .d-table thead th { background: #FAFAF9; font-size: 12px; font-weight: 700; color: #78716C; text-transform: uppercase; letter-spacing: .05em; }
+            .d-table tbody tr:hover td { background: rgba(245,158,11,.04); }
+            .d-table td, .d-table th { padding: 14px 20px; border-bottom: 1px solid #F5F5F4; }
+
+            /* Desktop button */
+            .d-btn-primary {
+                display: inline-flex; align-items: center; gap: 8px;
+                padding: 10px 20px;
+                background: #F59E0B; color: #fff;
+                border-radius: 10px; border: none;
+                font-size: 14px; font-weight: 600;
+                cursor: pointer;
+                transition: background .2s, transform .15s;
+                text-decoration: none;
+            }
+            .d-btn-primary:hover { background: #D97706; }
+            .d-btn-secondary {
+                display: inline-flex; align-items: center; gap: 8px;
+                padding: 10px 20px;
+                background: #fff; color: #1C1917;
+                border-radius: 10px; border: 1px solid #E7E5E4;
+                font-size: 14px; font-weight: 600;
+                cursor: pointer;
+                transition: background .2s;
+                text-decoration: none;
+            }
+            .d-btn-secondary:hover { background: #F5F5F4; }
+
+            /* Desktop input */
+            .d-input {
+                width: 100%;
+                border: 1px solid #E7E5E4;
+                border-radius: 10px;
+                padding: 10px 14px;
+                font-size: 14px;
+                font-family: inherit;
+                color: #1C1917;
+                background: #fff;
+                outline: none;
+                transition: border-color .2s, box-shadow .2s;
+            }
+            .d-input:focus { border-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+
+            /* Desktop stat card */
+            .d-stat-card {
+                background: #fff; border: 1px solid #E7E5E4; border-radius: 16px;
+                padding: 20px 24px;
+                box-shadow: 0 1px 3px rgba(0,0,0,.06);
+                display: flex; align-items: center; gap: 16px;
+            }
+            .d-stat-icon {
+                width: 48px; height: 48px; border-radius: 12px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 20px; flex-shrink: 0;
+            }
+
+            /* Bottom nav hidden on desktop */
+            .mobile-only { display: none !important; }
+            .bottom-nav  { display: none !important; }
+            .ios-header  { display: none !important; }
+        }
+
+        /* Flash message override */
+        .flash-success { background:#F0FDF4; color:#166534; border:1px solid #BBF7D0; }
+        .flash-danger  { background:#FFF1F2; color:#9F1239; border:1px solid #FECDD3; }
+        .flash-warning { background:#FFFBEB; color:#92400E; border:1px solid #FDE68A; }
+        .flash-info    { background:#EFF6FF; color:#1E40AF; border:1px solid #BFDBFE; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+
+    <!-- ── FLASH MESSAGES ── -->
+    <div id="flash-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none" style="top: calc(16px + env(safe-area-inset-top, 0px))">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert-item mb-2 pointer-events-auto alert-animate px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3
+                    {% if category == 'success' %}flash-success
+                    {% elif category == 'danger' %}flash-danger
+                    {% elif category == 'warning' %}flash-warning
+                    {% else %}flash-info{% endif %}">
+                    <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} flex-shrink-0"></i>
+                    <p class="font-semibold text-sm flex-1">{{ message }}</p>
+                    <button onclick="this.parentElement.remove()" class="ml-auto hover:opacity-60 flex-shrink-0"><i class="fas fa-times text-xs"></i></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="relative">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- ── GLOBAL SCRIPTS ── -->
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alert-item').forEach(alert => {
+                alert.style.transition = "all 0.4s ease";
+                alert.style.opacity = "0";
+                alert.style.transform = "translateY(-12px)";
+                setTimeout(() => alert.remove(), 400);
+            });
+        }, 4000);
+
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalContent = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.7';
+                    submitBtn.innerHTML = `<i class="fas fa-circle-notch animate-spin mr-2"></i> Menyimpan...`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

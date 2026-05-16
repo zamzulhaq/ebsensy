@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Halaqoh - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900">Manajemen Halaqoh</h1>
+                <p class="text-slate-500">Kelola grup Tahfidz dan pembagian santri</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="px-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition">
+                Kembali ke Dashboard
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Buat Halaqoh -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-3xl shadow-sm border border-slate-100 h-fit">
+                <h2 class="text-xl font-bold text-slate-900 mb-6">Buat Grup Baru</h2>
+                <form action="{{ url_for('manage_halaqoh') }}" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nama Grup</label>
+                        <input type="text" name="name" placeholder="Contoh: Abu Bakar" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Guru Halaqoh</label>
+                        <select name="teacher_id" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" required>
+                            <option value="">Pilih Guru...</option>
+                            {% for t in teachers %}
+                            <option value="{{ t.id }}">{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition">
+                        Simpan Grup
+                    </button>
+                </form>
+
+                <hr class="my-8 border-slate-100">
+
+                <h2 class="text-xl font-bold text-slate-900 mb-6">Assign Santri</h2>
+                <form action="{{ url_for('assign_santri') }}" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Grup</label>
+                        <select name="halaqoh_id" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" required>
+                            {% for h in halaqoh_list %}
+                            <option value="{{ h.id }}">{{ h.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">ID/Nama Siswa</label>
+                        <input type="text" name="student_id" placeholder="Masukkan ID Siswa (UUID)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" required>
+                        <p class="text-[10px] text-slate-400 mt-1">*Admin bisa copy ID dari daftar siswa</p>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition">
+                        Daftarkan Santri
+                    </button>
+                </form>
+            </div>
+
+            <!-- Daftar Halaqoh -->
+            <div class="lg:col-span-2 space-y-6">
+                <h2 class="text-xl font-bold text-slate-900">Daftar Grup Halaqoh</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for h in halaqoh_list %}
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-black text-slate-900 text-lg">{{ h.name }}</h3>
+                                <p class="text-sm text-indigo-600 font-bold">{{ h.teachers.name }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ID Grup:</div>
+                        <div class="text-[10px] text-slate-300 truncate mb-4">{{ h.id }}</div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-50">
+                             <span class="text-xs font-bold text-slate-400">Status Aktif</span>
+                             <button class="text-rose-400 hover:text-rose-600"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade Paket - SaaS Absensi{% endblock %}
+
+{% block content %}
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden relative animate-in zoom-in duration-300">
+        <a href="{{ url_for('subscriptions.pricing') }}" class="absolute top-6 right-6 w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 transition">
+            <i class="fas fa-times"></i>
+        </a>
+
+        <div class="p-10 text-center">
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center text-3xl mx-auto mb-6 shadow-xl shadow-blue-500/10">
+                <i class="fas fa-rocket"></i>
+            </div>
+            
+            <h2 class="text-3xl font-black text-slate-900 mb-3">Tingkatkan ke Premium</h2>
+            <p class="text-slate-500 mb-8">Buka semua fitur akademik, monitoring halaqoh tanpa batas, dan analytics mendalam.</p>
+
+            <div class="bg-slate-50 rounded-3xl p-6 mb-8 text-left space-y-3">
+                <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                    Siswa Tidak Terbatas (Paket Enterprise)
+                </div>
+                <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                    Laporan PDF & Excel Otomatis
+                </div>
+                <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                    Dashboard Orang Tua & SMS Notifikasi
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="window.location.href='https://wa.me/628123456789?text=Saya%20tertarik%20upgrade%20SaaS%20Absensi'" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition">
+                    Hubungi Sales via WhatsApp
+                </button>
+                <a href="{{ url_for('subscriptions.pricing') }}" class="w-full py-5 text-slate-400 font-bold hover:text-slate-600 transition">
+                    Lihat Perbandingan Paket
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

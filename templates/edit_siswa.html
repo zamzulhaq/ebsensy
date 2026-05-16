@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Edit Data Siswa - Sistem Absensi{% endblock %}
+
+{% block content %}
+<div class="pb-safe">
+
+    <!-- iOS Header -->
+    <div class="ios-header md:hidden">
+        <a href="{{ url_for('daftar_siswa') }}" class="ios-back-btn"><i class="fas fa-chevron-left"></i> Siswa</a>
+        <span class="ios-header-title">Edit Siswa</span>
+    </div>
+
+    <!-- Mobile Form -->
+    <div class="md:hidden px-4 py-4">
+        <form action="{{ url_for('edit_siswa', id=student.id) }}" method="POST" class="space-y-4">
+            <div class="ios-card p-5 space-y-4" style="background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+                <p class="text-xs font-bold uppercase tracking-widest" style="color:#8E8E93">Data Siswa</p>
+
+                <div>
+                    <label for="name" class="block text-xs font-semibold mb-2" style="color:#3A3A3C">Nama Lengkap</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:#C7C7CC"></i>
+                        <input type="text" class="ios-input pl-10" id="name" name="name" value="{{ student.name }}" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="nisn" class="block text-xs font-semibold mb-2" style="color:#3A3A3C">NISN</label>
+                    <div class="relative">
+                        <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:#C7C7CC"></i>
+                        <input type="text" class="ios-input pl-10" id="nisn" name="nisn" value="{{ student.nisn }}" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="class_id" class="block text-xs font-semibold mb-2" style="color:#3A3A3C">Kelas</label>
+                    <div class="relative">
+                        <i class="fas fa-chalkboard absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:#C7C7CC"></i>
+                        <select class="ios-input pl-10" id="class_id" name="class_id" required style="appearance:none">
+                            {% for class in classes %}
+                                <option value="{{ class.id }}" {% if student.class_id == class.id %}selected{% endif %}>
+                                    {{ class.name }} (Level {{ class.level }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:#C7C7CC"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="ios-btn-primary">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
+            <a href="{{ url_for('daftar_siswa') }}" class="flex items-center justify-center w-full h-12 rounded-2xl font-semibold text-sm" style="background:#F2F2F7;color:#3A3A3C">
+                Batal
+            </a>
+        </form>
+    </div>
+
+    <!-- Desktop Form -->
+    <div class="hidden md:flex with-sidebar items-center justify-center min-h-screen p-8" style="background:#FAFAF9">
+        <div style="max-width:420px;width:100%">
+            <div class="desktop-card overflow-hidden">
+                <div class="p-8 text-center relative overflow-hidden" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
+                    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,.1);border-radius:50%"></div>
+                    <div style="width:60px;height:60px;background:rgba(255,255,255,.2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;position:relative;z-index:1">
+                        <i class="fas fa-user-edit text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-xl font-extrabold text-white relative z-10">Edit Data Siswa</h1>
+                </div>
+
+                <form action="{{ url_for('edit_siswa', id=student.id) }}" method="POST" class="p-8 space-y-5">
+                    <div>
+                        <label for="name" class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#78716C">Nama Lengkap</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:#A8A29E"></i>
+                            <input type="text" class="d-input pl-10" id="name" name="name" value="{{ student.name }}" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="nisn" class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#78716C">NISN</label>
+                        <div class="relative">
+                            <i class="fas fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:#A8A29E"></i>
+                            <input type="text" class="d-input pl-10" id="nisn" name="nisn" value="{{ student.nisn }}" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="class_id" class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#78716C">Kelas</label>
+                        <div class="relative">
+                            <i class="fas fa-chalkboard absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:#A8A29E"></i>
+                            <select class="d-input pl-10" id="class_id" name="class_id" required style="appearance:none">
+                                {% for class in classes %}
+                                    <option value="{{ class.id }}" {% if student.class_id == class.id %}selected{% endif %}>
+                                        {{ class.name }} (Level {{ class.level }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style="color:#A8A29E"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="d-btn-primary flex-1 justify-center py-3">
+                            <i class="fas fa-save"></i> Simpan Perubahan
+                        </button>
+                        <a href="{{ url_for('daftar_siswa') }}" class="d-btn-secondary px-6">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

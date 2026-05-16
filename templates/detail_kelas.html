@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Detail Kelas - {{ class_data.name }}{% endblock %}
+
+{% block content %}
+<div class="pb-safe">
+
+    <!-- iOS Header -->
+    <div class="ios-header md:hidden">
+        <a href="{{ url_for('dashboard') }}" class="ios-back-btn"><i class="fas fa-chevron-left"></i> Dashboard</a>
+        <span class="ios-header-title">Kelas {{ class_data.name }}</span>
+        <a href="{{ url_for('input_absensi', class_id=class_data.id) }}" class="ios-header-action" style="color:#F59E0B">Absen</a>
+    </div>
+
+    <!-- Mobile -->
+    <div class="md:hidden px-4 py-3">
+        <!-- Class Info -->
+        <div style="background:#F59E0B;border-radius:16px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(245,158,11,.25)">
+            <div class="text-white">
+                <p class="text-xs font-bold uppercase tracking-widest" style="color:rgba(255,255,255,.7)">Tingkat {{ class_data.level }}</p>
+                <h1 class="text-xl font-extrabold">Kelas {{ class_data.name }}</h1>
+                <p class="text-xs font-medium" style="color:rgba(255,255,255,.8)">{{ students|length }} Siswa Terdaftar</p>
+            </div>
+            <a href="{{ url_for('input_absensi', class_id=class_data.id) }}" style="background:rgba(255,255,255,.2);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap">
+                <i class="fas fa-clipboard-check mr-1"></i> Absen
+            </a>
+        </div>
+
+        <!-- Student List -->
+        <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            {% for student in students %}
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #E5E5EA">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:38px;height:38px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#D97706;font-size:16px;flex-shrink:0">
+                        {{ student.name[0] }}
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm" style="color:#1C1C1E">{{ student.name }}</p>
+                        <p class="text-xs" style="color:#8E8E93">NISN: {{ student.nisn }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('input_hafalan', student_id=student.id) }}" style="background:#FEF3C7;color:#D97706;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;text-decoration:none">
+                    <i class="fas fa-book-open mr-1"></i> Hafalan
+                </a>
+            </div>
+            {% else %}
+            <div style="padding:60px 20px;text-align:center">
+                <i class="fas fa-user-slash" style="font-size:36px;color:#E5E5EA;display:block;margin-bottom:12px"></i>
+                <h4 class="font-bold" style="color:#1C1C1E">Belum ada siswa</h4>
+                <p style="color:#8E8E93;font-size:13px">Daftarkan siswa baru ke kelas ini.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="hidden md:block with-sidebar max-w-6xl px-8 py-8">
+        <!-- Page Header -->
+        <div class="p-8 rounded-2xl mb-8 flex items-center justify-between" style="background:linear-gradient(135deg,#F59E0B,#D97706);box-shadow:0 8px 32px rgba(245,158,11,.25)">
+            <div class="text-white">
+                <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:rgba(255,255,255,.7)">Tingkat {{ class_data.level }}</p>
+                <h1 class="text-3xl font-extrabold">Kelas {{ class_data.name }}</h1>
+                <p class="text-sm mt-1" style="color:rgba(255,255,255,.8)"><i class="fas fa-users mr-2"></i>{{ students|length }} Siswa Terdaftar</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ url_for('input_absensi', class_id=class_data.id) }}" class="d-btn-primary" style="background:#fff;color:#D97706">
+                    <i class="fas fa-clipboard-check"></i> Input Absen
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="d-btn-secondary" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+            </div>
+        </div>
+
+        <div class="desktop-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left d-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px">No</th>
+                            <th>Nama Siswa</th>
+                            <th>NISN</th>
+                            <th class="text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td class="text-sm font-bold" style="color:#A8A29E">{{ loop.index }}</td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div style="width:36px;height:36px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#D97706">
+                                        {{ student.name[0] }}
+                                    </div>
+                                    <span class="font-bold text-sm" style="color:#1C1917">{{ student.name }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <code style="background:#FEF3C7;color:#92400E;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700">{{ student.nisn }}</code>
+                            </td>
+                            <td class="text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="{{ url_for('input_hafalan', student_id=student.id) }}" class="d-btn-secondary text-xs py-2">
+                                        <i class="fas fa-book-open"></i> Hafalan
+                                    </a>
+                                    <span style="background:#D1FAE5;color:#065F46;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700">
+                                        <i class="fas fa-check-circle mr-1"></i> Aktif
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="padding:80px 20px;text-align:center">
+                                <i class="fas fa-user-slash" style="font-size:48px;color:#E7E5E4;display:block;margin-bottom:16px"></i>
+                                <h4 class="font-bold mb-1" style="color:#1C1917">Belum ada siswa di kelas ini</h4>
+                                <p style="color:#78716C;font-size:14px">Daftarkan siswa baru ke kelas ini melalui menu Tambah Siswa.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav mobile-only">
+    <a href="{{ url_for('dashboard') }}" class="bottom-nav-item"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+    <a href="{{ url_for('input_absensi', class_id=class_data.id) }}" class="bottom-nav-item active"><i class="fas fa-clipboard-check"></i><span>Absen</span></a>
+    <a href="{{ url_for('daftar_siswa') }}" class="bottom-nav-item"><i class="fas fa-user-graduate"></i><span>Siswa</span></a>
+    <a href="{{ url_for('logout') }}" class="bottom-nav-item"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+</nav>
+{% endblock %}

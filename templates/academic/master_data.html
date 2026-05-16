@@ -1,0 +1,130 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Master Data Akademik - E-Absensi & Tahfidz{% endblock %}
+{% block header_title %}Master Data Akademik{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Breadcrumb & Action -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-blue-600">Master Data</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Mata Pelajaran -->
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    Mata Pelajaran
+                </h2>
+            </div>
+            
+            <div class="p-8 border-b border-slate-50">
+                <form method="POST" action="" class="flex gap-3">
+                    <input type="hidden" name="action" value="add_subject">
+                    <input type="text" name="name" required placeholder="Nama Mata Pelajaran..." class="flex-1 px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:outline-none focus:border-blue-500 transition-all font-bold text-sm outline-none">
+                    <button type="submit" class="px-8 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 text-xs uppercase tracking-widest">Tambah</button>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <tbody class="divide-y divide-slate-50">
+                        {% for item in subjects %}
+                        <tr class="hover:bg-slate-50 transition-all group">
+                            <td class="px-8 py-5">
+                                <p class="font-black text-slate-700">{{ item.name }}</p>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <form method="POST" action="" class="inline" onsubmit="return confirm('Hapus mata pelajaran ini?')">
+                                    <input type="hidden" name="action" value="delete_subject">
+                                    <input type="hidden" name="id" value="{{ item.id }}">
+                                    <button type="submit" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all opacity-0 group-hover:opacity-100">
+                                        <i class="fas fa-trash text-[10px]"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="px-8 py-12 text-center">
+                                <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-inbox text-slate-300"></i>
+                                </div>
+                                <p class="text-slate-400 font-bold text-sm">Belum ada data mata pelajaran.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jenis Ujian -->
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    Jenis Ujian
+                </h2>
+            </div>
+            
+            <div class="p-8 border-b border-slate-50">
+                <form method="POST" action="" class="flex gap-3">
+                    <input type="hidden" name="action" value="add_exam_type">
+                    <input type="text" name="name" required placeholder="Misal: PAS / PTS" class="flex-1 px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:outline-none focus:border-indigo-500 transition-all font-bold text-sm outline-none">
+                    <input type="number" name="weight" required placeholder="%" min="0" max="100" class="w-24 px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:outline-none focus:border-indigo-500 transition-all font-bold text-sm outline-none">
+                    <button type="submit" class="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 text-xs uppercase tracking-widest">Tambah</button>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <tbody class="divide-y divide-slate-50">
+                        {% for item in exam_types %}
+                        <tr class="hover:bg-slate-50 transition-all group">
+                            <td class="px-8 py-5">
+                                <p class="font-black text-slate-700">{{ item.name }}</p>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black rounded-lg uppercase tracking-widest">Bobot: {{ item.weight }}%</span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <form method="POST" action="" class="inline" onsubmit="return confirm('Hapus jenis ujian ini?')">
+                                    <input type="hidden" name="action" value="delete_exam_type">
+                                    <input type="hidden" name="id" value="{{ item.id }}">
+                                    <button type="submit" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all opacity-0 group-hover:opacity-100">
+                                        <i class="fas fa-trash text-[10px]"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="px-8 py-12 text-center">
+                                <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-inbox text-slate-300"></i>
+                                </div>
+                                <p class="text-slate-400 font-bold text-sm">Belum ada data jenis ujian.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Target Mingguan - ERP Tahfidz Premium{% endblock %}
+{% block header_title %}Manajemen Target Hafalan{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8 pb-12">
+    
+    <!-- ══ HEADER & ACTION ══ -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Kelola Target Mingguan</h1>
+            <p class="text-slate-500 font-bold mt-1">Atur target capaian hafalan santri untuk setiap pekannya.</p>
+        </div>
+        <a href="{{ url_for('create_weekly_target') }}" class="px-8 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center gap-3 text-xs uppercase tracking-widest">
+            <i class="fas fa-plus"></i> Tambah Target Baru
+        </a>
+    </div>
+
+    <!-- ══ TARGETS GRID ══ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% if targets %}
+            {% for t in targets %}
+            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/40 transition-all p-8 group">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xl group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ url_for('edit_weekly_target', id=t.id) }}" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition-all">
+                            <i class="fas fa-edit text-xs"></i>
+                        </a>
+                        <a href="{{ url_for('delete_weekly_target', id=t.id) }}" class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-all" onclick="return confirm('Hapus target ini?')">
+                            <i class="fas fa-trash text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight mb-1">{{ t.class_name }}</h3>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kelas / Rombel</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mulai Pekan</p>
+                        <p class="text-sm font-black text-slate-700 tracking-tight">{{ t.week_start }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Capaian</p>
+                        <p class="text-2xl font-black text-indigo-600 tracking-tight">{{ t.target_pages }} <span class="text-xs text-slate-400">hlm</span></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex items-center gap-2">
+                    <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="w-full h-full bg-indigo-500/20"></div>
+                    </div>
+                    <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Active Target</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- EMPTY STATE -->
+            <div class="lg:col-span-3 bg-white rounded-[4rem] border border-slate-100 p-20 text-center">
+                <div class="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 text-slate-200">
+                    <i class="fas fa-bullseye text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight mb-2">Belum Ada Target Mingguan</h3>
+                <p class="text-slate-400 font-bold max-w-sm mx-auto mb-10 leading-relaxed">
+                    Tentukan target hafalan baru untuk setiap kelas agar Anda bisa memantau progres mingguan para santri.
+                </p>
+                <a href="{{ url_for('create_weekly_target') }}" class="inline-flex items-center gap-3 px-10 py-5 bg-blue-600 text-white rounded-[2rem] font-black text-sm hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/20 uppercase tracking-widest">
+                    <i class="fas fa-plus"></i> Buat Target Pertama
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Sekarang - SaaS Absensi Sekolah{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center mb-6">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl shadow-blue-500/20">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+        </div>
+        <h2 class="text-center text-3xl font-black text-slate-900 tracking-tight">Mulai Kelola Sekolah Anda</h2>
+        <p class="mt-2 text-center text-sm text-slate-500 font-medium">
+            Daftar dalam 60 detik. Gratis trial 7 hari.
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
+        <div class="bg-white py-10 px-6 shadow-xl shadow-slate-200/50 rounded-[2.5rem] border border-slate-100 sm:px-12">
+            <form action="{{ url_for('saas_auth.register') }}" method="POST" class="space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- School Section -->
+                    <div class="col-span-full border-b border-slate-100 pb-4">
+                        <h3 class="text-sm font-black text-blue-600 uppercase tracking-widest">Informasi Sekolah</h3>
+                    </div>
+
+                    <div class="col-span-full">
+                        <label for="school_name" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nama Sekolah / Instansi</label>
+                        <input id="school_name" name="school_name" type="text" required placeholder="Contoh: SMA Al Hikmah"
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="phone" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">No. WhatsApp</label>
+                        <input id="phone" name="phone" type="tel" required placeholder="0812..."
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="address" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Alamat (Opsional)</label>
+                        <input id="address" name="address" type="text" placeholder="Kota/Kabupaten"
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+
+                    <!-- Admin Section -->
+                    <div class="col-span-full border-b border-slate-100 pb-4 pt-4">
+                        <h3 class="text-sm font-black text-blue-600 uppercase tracking-widest">Akun Administrator (Owner)</h3>
+                    </div>
+
+                    <div class="col-span-full">
+                        <label for="admin_name" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nama Lengkap Anda</label>
+                        <input id="admin_name" name="admin_name" type="text" required placeholder="Nama lengkap owner"
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Email Login</label>
+                        <input id="email" name="email" type="email" required placeholder="admin@sekolah.com"
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
+                        <input id="password" name="password" type="password" required placeholder="Min. 8 Karakter"
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-900">
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" id="submit-btn"
+                        class="w-full flex justify-center items-center py-5 px-4 border border-transparent rounded-2xl shadow-xl text-lg font-black text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all">
+                        <span id="btn-text">Daftar & Mulai Trial Gratis</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 text-center">
+                <p class="text-sm text-slate-500 font-medium">
+                    Sudah punya akun? 
+                    <a href="{{ url_for('login') }}" class="text-blue-600 font-bold hover:text-blue-500">Log in di sini</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = document.getElementById('submit-btn');
+        const text = document.getElementById('btn-text');
+        btn.disabled = true;
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        text.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i> Menyiapkan Sekolah Anda...';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Edit Guru - {{ teacher.name }}{% endblock %}
+
+{% block content %}
+<div class="pb-safe">
+
+    <!-- iOS Header -->
+    <div class="ios-header md:hidden">
+        <a href="{{ url_for('daftar_guru') }}" class="ios-back-btn"><i class="fas fa-chevron-left"></i> Guru</a>
+        <span class="ios-header-title">Edit Guru</span>
+    </div>
+
+    <!-- Mobile Form -->
+    <div class="md:hidden px-4 py-4 space-y-4">
+        <form action="{{ url_for('edit_guru', id=teacher.id) }}" method="POST" class="space-y-4">
+            <div class="ios-card p-5 space-y-4">
+                <p class="text-xs font-bold uppercase tracking-widest" style="color:#8E8E93">Edit Profil Guru</p>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-2" style="color:#3A3A3C">Nama Lengkap</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:#C7C7CC"></i>
+                        <input type="text" name="name" value="{{ teacher.name }}" class="ios-input pl-10" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-2" style="color:#3A3A3C">NIP</label>
+                    <div class="relative">
+                        <i class="fas fa-id-badge absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:#C7C7CC"></i>
+                        <input type="text" name="nip" value="{{ teacher.nip }}" class="ios-input pl-10" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-3" style="color:#3A3A3C">Peran Guru (Multi-Role)</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <span class="text-sm font-bold text-slate-700">Guru Pengajar</span>
+                            <input type="checkbox" name="roles" value="pengajar" class="w-5 h-5 rounded-lg text-amber-500" 
+                                   {% if 'pengajar' in teacher.roles %}checked{% endif %} onchange="toggleAssignmentFields()">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <span class="text-sm font-bold text-slate-700">Musyrif Halaqoh</span>
+                            <input type="checkbox" name="roles" value="halaqoh" class="w-5 h-5 rounded-lg text-amber-500"
+                                   {% if 'halaqoh' in teacher.roles %}checked{% endif %} onchange="toggleAssignmentFields()">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <span class="text-sm font-bold text-slate-700">Administrator</span>
+                            <input type="checkbox" name="roles" value="admin" class="w-5 h-5 rounded-lg text-amber-500"
+                                   {% if 'admin' in teacher.roles %}checked{% endif %}>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="assign_class_field" class="{% if 'pengajar' not in teacher.roles %}hidden{% endif %}">
+                    <label class="block text-xs font-semibold mb-2" style="color:#F59E0B">Penugasan Wali Kelas</label>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-sm text-amber-400"></i>
+                        <select name="class_id" class="ios-input pl-10" style="appearance:none;background:#FFFBEB;border:1px solid #FDE68A">
+                            <option value="">-- Tidak Ada Penugasan --</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}" {% if c.id == current_class_id %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none text-amber-400"></i>
+                    </div>
+                </div>
+
+                <div id="assign_halaqoh_field" class="{% if 'halaqoh' not in teacher.roles %}hidden{% endif %}">
+                    <label class="block text-xs font-semibold mb-2" style="color:#10B981">Penugasan Musyrif</label>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-sm text-emerald-400"></i>
+                        <select name="halaqoh_id" class="ios-input pl-10" style="appearance:none;background:#ECFDF5;border:1px solid #A7F3D0">
+                            <option value="">-- Tidak Ada Penugasan --</option>
+                            {% for h in halaqohs %}
+                                <option value="{{ h.id }}" {% if h.id == current_halaqoh_id %}selected{% endif %}>{{ h.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none text-emerald-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="ios-btn-primary">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
+            <a href="{{ url_for('daftar_guru') }}" class="flex items-center justify-center w-full h-12 rounded-2xl font-semibold text-sm" style="background:#F2F2F7;color:#3A3A3C">
+                Batal
+            </a>
+        </form>
+    </div>
+
+    <!-- Desktop Form -->
+    <div class="hidden md:flex with-sidebar items-center justify-center min-h-screen p-8" style="background:#FAFAF9">
+        <div style="max-width:640px;width:100%">
+            <div class="desktop-card overflow-hidden">
+                <div class="p-8 text-center relative overflow-hidden" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
+                    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,.1);border-radius:50%"></div>
+                    <div style="width:60px;height:60px;background:rgba(255,255,255,.2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;position:relative;z-index:1">
+                        <i class="fas fa-user-edit text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-white relative z-10">Edit Data Guru</h2>
+                    <p class="text-sm relative z-10" style="color:rgba(255,255,255,.8)">Perbarui profil dan multi-role guru</p>
+                </div>
+
+                <form action="{{ url_for('edit_guru', id=teacher.id) }}" method="POST" class="p-8 space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#78716C">Nama Lengkap</label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
+                                <input type="text" name="name" value="{{ teacher.name }}" class="d-input pl-10" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#78716C">NIP</label>
+                            <div class="relative">
+                                <i class="fas fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
+                                <input type="text" name="nip" value="{{ teacher.nip }}" class="d-input pl-10" required>
+                            </div>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-3" style="color:#78716C">Peran Guru</label>
+                            <div class="grid grid-cols-3 gap-4">
+                                <label class="flex flex-col items-center gap-2 p-4 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-amber-500 transition-all group">
+                                    <input type="checkbox" name="roles" value="pengajar" class="sr-only peer" 
+                                           {% if 'pengajar' in teacher.roles %}checked{% endif %} onchange="toggleAssignmentFields()">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-stone-200 group-hover:bg-amber-50 group-hover:border-amber-200 peer-checked:bg-amber-500 peer-checked:border-amber-500 peer-checked:text-white transition-all">
+                                        <i class="fas fa-chalkboard"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-stone-600 peer-checked:text-amber-700">Pengajar</span>
+                                </label>
+                                <label class="flex flex-col items-center gap-2 p-4 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-emerald-500 transition-all group">
+                                    <input type="checkbox" name="roles" value="halaqoh" class="sr-only peer"
+                                           {% if 'halaqoh' in teacher.roles %}checked{% endif %} onchange="toggleAssignmentFields()">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-stone-200 group-hover:bg-emerald-50 group-hover:border-emerald-200 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:text-white transition-all">
+                                        <i class="fas fa-book-quran"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-stone-600 peer-checked:text-emerald-700">Halaqoh</span>
+                                </label>
+                                <label class="flex flex-col items-center gap-2 p-4 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-blue-500 transition-all group">
+                                    <input type="checkbox" name="roles" value="admin" class="sr-only peer"
+                                           {% if 'admin' in teacher.roles %}checked{% endif %}>
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-stone-200 group-hover:bg-blue-50 group-hover:border-blue-200 peer-checked:bg-blue-500 peer-checked:border-blue-500 peer-checked:text-white transition-all">
+                                        <i class="fas fa-shield-halved"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-stone-600 peer-checked:text-blue-700">Admin</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="d_assign_class_field" class="{% if 'pengajar' not in teacher.roles %}hidden{% endif %} col-span-1">
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#D97706">Wali Kelas Dari</label>
+                            <div class="relative">
+                                <i class="fas fa-link absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-amber-400"></i>
+                                <select name="class_id" class="d-input pl-10 border-amber-200 bg-amber-50/30" style="appearance:none">
+                                    <option value="">-- Tidak Ada --</option>
+                                    {% for c in classes %}
+                                        <option value="{{ c.id }}" {% if c.id == current_class_id %}selected{% endif %}>{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="d_assign_halaqoh_field" class="{% if 'halaqoh' not in teacher.roles %}hidden{% endif %} col-span-1">
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-2" style="color:#059669">Musyrif Grup</label>
+                            <div class="relative">
+                                <i class="fas fa-link absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-emerald-400"></i>
+                                <select name="halaqoh_id" class="d-input pl-10 border-emerald-200 bg-emerald-50/30" style="appearance:none">
+                                    <option value="">-- Tidak Ada --</option>
+                                    {% for h in halaqohs %}
+                                        <option value="{{ h.id }}" {% if h.id == current_halaqoh_id %}selected{% endif %}>{{ h.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4 border-t border-stone-100">
+                        <button type="submit" class="d-btn-primary flex-1 justify-center py-3">
+                            <i class="fas fa-save"></i> Simpan Perubahan
+                        </button>
+                        <a href="{{ url_for('daftar_guru') }}" class="d-btn-secondary px-8">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAssignmentFields() {
+        // Find all checked roles
+        const roles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(cb => cb.value);
+        
+        // Mobile elements
+        const mClass = document.getElementById('assign_class_field');
+        const mHalaqoh = document.getElementById('assign_halaqoh_field');
+        
+        // Desktop elements
+        const dClass = document.getElementById('d_assign_class_field');
+        const dHalaqoh = document.getElementById('d_assign_halaqoh_field');
+
+        if (roles.includes('pengajar')) {
+            mClass?.classList.remove('hidden');
+            dClass?.classList.remove('hidden');
+        } else {
+            mClass?.classList.add('hidden');
+            dClass?.classList.add('hidden');
+        }
+
+        if (roles.includes('halaqoh')) {
+            mHalaqoh?.classList.remove('hidden');
+            dHalaqoh?.classList.remove('hidden');
+        } else {
+            mHalaqoh?.classList.add('hidden');
+            dHalaqoh?.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

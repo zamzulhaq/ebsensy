@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Guru - E-Absensi{% endblock %}
+
+{% block content %}
+<div class="pb-safe">
+
+    <!-- iOS Header -->
+    <div class="ios-header md:hidden">
+        <span class="ios-header-title">Portal Guru</span>
+        <a href="{{ url_for('logout') }}" class="ios-header-action" style="color:#FF3B30"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+
+    <!-- Desktop Layout with Sidebar -->
+    <div class="flex min-h-screen">
+        <!-- Desktop Sidebar -->
+        <aside class="desktop-sidebar">
+            <div style="padding:20px 16px 16px;border-bottom:1px solid #292524">
+                <div class="flex items-center gap-3">
+                    <div style="width:36px;height:36px;background:#F59E0B;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="fas fa-chalkboard-teacher text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-white text-sm">Portal Guru</span>
+                </div>
+            </div>
+            <div style="flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px">
+                <a href="{{ url_for('guru_dashboard') }}" class="desktop-sidebar-item active"><i class="fas fa-th-large"></i> Dashboard</a>
+                {% if session.get('roles') and session.get('roles')|length > 1 %}
+                <a href="{{ url_for('guru_dashboard') }}" class="desktop-sidebar-item" style="color:#F59E0B; background:rgba(245,158,11,0.05)"><i class="fas fa-shuffle"></i> Ganti Peran</a>
+                {% endif %}
+                <a href="#" class="desktop-sidebar-item"><i class="fas fa-calendar-check"></i> Riwayat Absen</a>
+                <a href="#" class="desktop-sidebar-item"><i class="fas fa-user-graduate"></i> Siswa Saya</a>
+            </div>
+            <div style="padding:12px;border-top:1px solid #292524">
+                <div class="flex items-center gap-3 p-3 rounded-xl mb-3" style="background:#292524">
+                    <div style="width:36px;height:36px;border-radius:50%;background:#F59E0B;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0">
+                        {{ teacher_name[0] if teacher_name else 'G' }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-white truncate">{{ teacher_name }}</p>
+                        <p class="text-xs uppercase" style="color:#57534E;font-weight:700">Wali Kelas</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('logout') }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold" style="background:rgba(239,68,68,.1);color:#F87171">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 with-sidebar" style="background:#FAFAF9">
+
+            <!-- Desktop Welcome Header -->
+            <div class="hidden md:block px-8 py-5" style="border-bottom:1px solid #E7E5E4;background:#fff">
+                <h1 class="text-2xl font-extrabold" style="color:#1C1917">Selamat Datang, {{ teacher_name }}!</h1>
+                <p class="text-sm mt-0.5" style="color:#78716C">Kelola kehadiran siswa di kelas Anda hari ini dengan mudah.</p>
+            </div>
+
+            <div class="px-4 md:px-8 py-4 md:py-8 max-w-4xl">
+
+                <!-- Mobile Welcome -->
+                <div class="md:hidden p-5 rounded-2xl mb-4" style="background:#F59E0B;box-shadow:0 4px 16px rgba(245,158,11,.25)">
+                    <h1 class="text-xl font-extrabold text-white mb-1">Halo, {{ teacher_name }}!</h1>
+                    <p class="text-sm" style="color:rgba(255,255,255,.8)">Kelola kehadiran siswa hari ini.</p>
+                </div>
+
+                <!-- Section Title -->
+                <div class="flex items-center gap-4 mb-4">
+                    <h2 class="font-extrabold text-base md:text-xl" style="color:#1C1917">Kelas Saya</h2>
+                    <div class="flex-1 h-px hidden md:block" style="background:#E7E5E4"></div>
+                </div>
+
+                {% if my_class %}
+                <!-- Class Card -->
+                <div class="ios-card md:desktop-card p-5 md:p-7">
+                    <div class="flex items-start justify-between mb-5">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:#A8A29E">Tingkat {{ my_class.level }}</p>
+                            <h3 class="text-2xl font-extrabold" style="color:#1C1917">Kelas {{ my_class.name }}</h3>
+                            <p class="text-sm mt-1" style="color:#78716C">Anda adalah Wali Kelas. Pastikan semua siswa sudah terabsen hari ini.</p>
+                        </div>
+                        <div style="width:48px;height:48px;background:#FEF3C7;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                            <i class="fas fa-chalkboard text-xl" style="color:#D97706"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 md:flex md:space-y-0 md:gap-3">
+                        <a href="{{ url_for('input_absensi', class_id=my_class.id) }}" class="ios-btn-primary md:d-btn-primary md:w-auto" style="flex:1">
+                            <i class="fas fa-clipboard-check"></i> Mulai Absensi Hari Ini
+                        </a>
+                        <a href="{{ url_for('detail_kelas', class_id=my_class.id) }}" class="flex items-center justify-center gap-2 w-full h-12 md:h-auto md:py-2.5 md:px-5 rounded-2xl font-bold text-sm" style="background:#F2F2F7;color:#3A3A3C">
+                            <i class="fas fa-users"></i> Lihat Daftar Siswa
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="ios-card md:desktop-card p-6 flex items-start gap-4" style="border-left:4px solid #DBEAFE">
+                    <div style="width:44px;height:44px;background:#DBEAFE;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class="fas fa-info-circle" style="color:#1D4ED8;font-size:18px"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-bold mb-1" style="color:#1C1917">Belum Menjadi Wali Kelas</h5>
+                        <p class="text-sm" style="color:#78716C">Data Anda belum terhubung ke kelas mana pun. Silakan hubungi Admin untuk penentuan Wali Kelas.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<nav class="bottom-nav mobile-only">
+    <a href="{{ url_for('guru_dashboard') }}" class="bottom-nav-item active"><i class="fas fa-house"></i><span>Beranda</span></a>
+    {% if session.get('roles') and session.get('roles')|length > 1 %}
+    <a href="{{ url_for('guru_dashboard') }}" class="bottom-nav-item" style="color:#D97706"><i class="fas fa-shuffle"></i><span>Ganti Peran</span></a>
+    {% endif %}
+    {% if my_class %}
+    <a href="{{ url_for('input_absensi', class_id=my_class.id) }}" class="bottom-nav-item"><i class="fas fa-clipboard-check"></i><span>Absen</span></a>
+    <a href="{{ url_for('detail_kelas', class_id=my_class.id) }}" class="bottom-nav-item"><i class="fas fa-users"></i><span>Siswa</span></a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}" class="bottom-nav-item"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+</nav>
+{% endblock %}

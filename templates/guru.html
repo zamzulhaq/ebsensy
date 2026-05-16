@@ -1,0 +1,104 @@
+{% extends "layouts/base_dashboard.html" %}
+
+{% block title %}Manajemen Guru - {{ school_name }}{% endblock %}
+{% block header_title %}Manajemen Guru{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Breadcrumb & Action -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+            <i class="fas fa-chevron-right text-[8px]"></i>
+            <span class="text-blue-600">Data Guru</span>
+        </div>
+        <a href="{{ url_for('tambah_guru') }}" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-black text-xs shadow-lg shadow-amber-500/20 hover:bg-amber-600 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+            <i class="fas fa-plus"></i> Tambah Guru Baru
+        </a>
+    </div>
+
+    <!-- Teachers Table -->
+    <div class="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50/50">
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Profil Guru</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tipe / Role</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">NIP / Kontak</th>
+                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% if teachers %}
+                        {% for teacher in teachers %}
+                        <tr class="group hover:bg-slate-50/30 transition-all duration-300">
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-base group-hover:bg-amber-500 group-hover:text-white transition-all duration-500">
+                                        {{ teacher.name[0] if teacher.name else '?' }}
+                                    </div>
+                                    <div>
+                                        <p class="font-black text-slate-900 text-base leading-tight">{{ teacher.name }}</p>
+                                        <p class="text-xs text-slate-400 font-medium">{{ teacher.email or 'No Email' }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-10 py-6">
+                                <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                                    <i class="fas {% if teacher.teacher_type == 'pengajar' %}fa-laptop-code{% else %}fa-mosque{% endif %} mr-1"></i>
+                                    {{ teacher.teacher_type|capitalize }}
+                                </span>
+                            </td>
+                            <td class="px-10 py-6">
+                                <p class="text-sm font-black text-slate-700 leading-none mb-1">{{ teacher.nip or '---' }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Data Terverifikasi</p>
+                            </td>
+                            <td class="px-10 py-6 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <form method="POST" action="{{ url_for('auth.admin_reset_password', teacher_id=teacher.id) }}" class="inline" onsubmit="return confirmReset(this)">
+                                        <input type="hidden" name="username_fallback" value="{{ teacher.nip or teacher.name|lower|replace(' ', '') }}">
+                                        <input type="hidden" name="new_password" class="new-password-input">
+                                        <button type="submit" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all flex items-center justify-center" title="Reset Password">
+                                            <i class="fas fa-key text-[10px]"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('edit_guru', id=teacher.id) }}" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center">
+                                        <i class="fas fa-edit text-[10px]"></i>
+                                    </a>
+                                    <a href="{{ url_for('hapus_guru', id=teacher.id) }}" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center" onclick="return confirm('Hapus data guru ini?')">
+                                        <i class="fas fa-trash text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="px-10 py-24 text-center">
+                                <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto mb-6">
+                                    <i class="fas fa-chalkboard-teacher text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-black text-slate-900">Belum Ada Data Guru</h3>
+                                <p class="text-slate-400 font-bold mt-1">Daftarkan pengajar pertama untuk sekolah Anda.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmReset(form) {
+    const pwd = prompt("Masukkan password baru untuk guru ini (minimal 6 karakter):");
+    if (pwd === null) return false;
+    if (pwd.trim() === "") return false;
+    if (pwd.trim().length < 6) { alert("Password baru harus minimal 6 karakter!"); return false; }
+    form.querySelector('.new-password-input').value = pwd;
+    return true;
+}
+</script>
+{% endblock %}

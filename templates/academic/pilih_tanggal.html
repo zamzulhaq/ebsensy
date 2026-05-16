@@ -1,0 +1,52 @@
+{% extends 'layouts/base_dashboard.html' %}
+
+{% block title %}Pilih Tanggal - ERP Tahfidz{% endblock %}
+{% block header_title %}Input Absensi{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-5xl mx-auto space-y-8">
+
+
+    <div class="text-center mb-10">
+        <div class="flex flex-wrap justify-center gap-3 mb-4">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <i class="fas fa-users-rectangle"></i> {{ class_name }}
+            </div>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <i class="fas fa-book-open-reader"></i> {{ subject_name }}
+            </div>
+        </div>
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Tentukan Tanggal</h2>
+        <p class="text-slate-500 font-medium mt-2">Pilih tanggal kehadiran yang ingin diinput.</p>
+    </div>
+
+    <div class="max-w-md mx-auto">
+        <form action="{{ url_for('academic.input_absensi') }}" method="GET" class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 space-y-8">
+            <input type="hidden" name="class_id" value="{{ class_id }}">
+            <input type="hidden" name="subject_id" value="{{ subject_id }}">
+            
+            <div class="space-y-4">
+                <label class="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1 text-center">Pilih Tanggal</label>
+                <input type="date" name="date" id="attendance_date" value="{{ today }}" required 
+                       class="w-full px-8 py-6 bg-slate-50 border-2 border-transparent rounded-[2rem] text-center text-2xl font-black text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none transition-all shadow-inner">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button type="button" onclick="document.getElementById('attendance_date').value = '{{ today }}'" 
+                        class="py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-sm">
+                    Hari Ini
+                </button>
+                <button type="submit" class="py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-sm">
+                    Lanjut Input <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-12">
+            <a href="{{ url_for('academic.select_subject', class_id=class_id) }}" class="text-slate-400 hover:text-slate-600 font-bold text-sm transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali Pilih Mapel
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

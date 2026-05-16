@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Guru - Ebsensy{% endblock %}
+{% block content %}
+<div class="p-8">
+    <h1 class="text-2xl font-bold">Dashboard Guru</h1>
+    <p>Kelola kelas dan hafalan santri Anda di sini.</p>
+    <a href="{{ url_for('guru_dashboard') }}" class="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded">Masuk ke Portal Guru</a>
+</div>
+{% endblock %}

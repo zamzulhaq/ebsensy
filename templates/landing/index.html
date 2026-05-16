@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ebsensy - Modernisasi Sistem Absensi Sekolah Anda</title>
+    <meta name="description"
+        content="Ebsensy adalah platform manajemen absensi digital modern untuk sekolah dan pesantren dengan fitur real-time dashboard dan rekap otomatis.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#2e1065',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
+                        'premium-hover': '0 20px 50px -12px rgba(0, 0, 0, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.05) 0%, rgba(255, 255, 255, 0) 50%);
+        }
+
+        .cta-gradient,
+        .primary-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-900 font-sans antialiased overflow-x-hidden">
+
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-lg">
+                    <i data-lucide="graduation-cap" class="text-white w-6 h-6"></i>
+                </div>
+                <span class="text-2xl font-display font-extrabold tracking-tight text-primary-600">e<span
+                        class="text-2xl font-display font-extrabold tracking-tight text-gray-900">bsensy</span></span>
+            </div>
+
+            <div class="hidden lg:flex items-center gap-10">
+                <a href="#home"
+                    class="text-sm font-semibold text-gray-900 hover:text-primary-600 transition-colors">Home</a>
+                <a href="#features"
+                    class="text-sm font-semibold text-gray-500 hover:text-primary-600 transition-colors">Fitur</a>
+                <a href="#pricing"
+                    class="text-sm font-semibold text-gray-500 hover:text-primary-600 transition-colors">Harga</a>
+                <a href="#faq"
+                    class="text-sm font-semibold text-gray-500 hover:text-primary-600 transition-colors">FAQ</a>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="{{ url_for('login') }}"
+                    class="text-sm font-bold text-gray-700 hover:text-primary-600 transition-colors">Login</a>
+                <a href="{{ url_for('login') }}"
+                    class="px-6 py-2.5 primary-gradient text-white rounded-full text-sm font-bold shadow-xl shadow-primary-500/20 hover:opacity-90 transition-all">Coba
+                    Gratis</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="relative pt-32 pb-24 lg:pt-48 lg:pb-32 hero-gradient overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center relative z-10">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-100 text-primary-600 text-[13px] font-bold shadow-sm mb-10">
+                🚀 #1 Monitoring Sekolah Tahfidz
+            </div>
+
+            <h1
+                class="text-4xl lg:text-6xl font-display font-extrabold text-gray-950 leading-[1.1] mb-8 tracking-tight">
+                Kelola Absensi & Monitoring <br /> Sekolah <br />
+                <span class="text-gradient">Lebih Modern & Profesional</span>
+            </h1>
+
+            <p class="text-base lg:text-lg text-gray-500 leading-relaxed max-w-3xl mx-auto mb-10 font-medium">
+                Kelola kehadiran siswa dan guru secara terpusat,
+                real-time, dan akurat — tanpa kertas, tanpa rekap manual.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                <a href="#"
+                    class="px-8 py-4 primary-gradient text-white rounded-2xl font-bold shadow-2xl shadow-primary-600/30 hover:scale-105 transition-all flex items-center justify-center gap-2">
+                    Mulai Gratis Sekarang
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+                <a href="#features"
+                    class="px-8 py-4 bg-white text-gray-900 border border-gray-100 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-sm">
+                    Lihat Demo
+                </a>
+            </div>
+
+            <!-- Decoration glows -->
+            <div
+                class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-primary-100 rounded-full blur-[120px] opacity-40 -z-10">
+            </div>
+            <div
+                class="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-100 rounded-full blur-[120px] opacity-40 -z-10">
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM VS SOLUTION -->
+    <section id="solution" class="py-20 bg-white">
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+            <h2 class="text-3xl lg:text-4xl font-display font-extrabold text-gray-950 mb-4">Masalah yang Masih Dihadapi
+                Banyak Sekolah Hari Ini</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto mb-16 font-medium text-sm lg:text-base">Administrasi kehadiran
+                yang lambat dan rawan kesalahan masih menjadi beban sehari-hari bagi banyak sekolah dan pesantren di
+                Indonesia.</p>
+            <div class="max-w-5xl mx-auto px-6">
+                <div class="grid lg:grid-cols-[1fr_auto_1fr] gap-8 items-center">
+                    <!-- Problem -->
+
+                    <!--
+2. Data kehadiran tersebar, sulit diakses, sulit diaudit
+3. Laporan bulanan membutuhkan waktu lama untuk disusun
+4. Tidak ada visibilitas real-time bagi kepala sekolah dan yayasan
+5. Sistem tidak terpusat — tiap kelas atau guru kelola sendiri-sendiri-->
+                    <div class="p-10 rounded-[2.5rem] bg-gray-50 border border-gray-100 shadow-premium">
+                        <h3 class="text-2xl font-display font-extrabold text-gray-950 mb-6">Absensi Manual</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-red-500"><i data-lucide="x-circle"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-gray-500 font-medium">Rekap absensi manual memakan waktu dan rentan salah
+                                    tulis.</p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-red-500"><i data-lucide="x-circle"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-gray-500 font-medium">Data kehadiran tersebar, sulit diakses, sulit
+                                    diaudit.</p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-red-500"><i data-lucide="x-circle"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-gray-500 font-medium">Laporan bulanan membutuhkan waktu lama untuk
+                                    disusun.
+                                </p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-red-500"><i data-lucide="x-circle"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-gray-500 font-medium">Sistem tidak terpusat — tiap kelas atau guru kelola
+                                    sendiri-sendiri.
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex flex-col items-center gap-4">
+                        <div
+                            class="w-14 h-14 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-xl transform rotate-90 lg:rotate-0">
+                            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Solution -->
+                    <div class="p-10 rounded-[2.5rem] bg-gray-950 text-white shadow-2xl shadow-gray-900/30">
+                        <h3 class="text-2xl font-display font-extrabold mb-6 text-white">Absensi Digital Ebsensy</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-primary-400"><i data-lucide="check-circle-2"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-white/80 font-medium">Rekap kehadiran tersusun otomatis — akurat tanpa
+                                    input ulang.
+                                </p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-primary-400"><i data-lucide="check-circle-2"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-white/80 font-medium">Semua data terpusat dalam satu dashboard yang bisa
+                                    diakses kapan saja.</p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-primary-400"><i data-lucide="check-circle-2"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-white/80 font-medium">Laporan terstruktur siap unduh — harian, mingguan,
+                                    hingga bulanan.
+                                </p>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="mt-1 w-5 h-5 flex-shrink-0 text-primary-400"><i data-lucide="check-circle-2"
+                                        class="w-5 h-5"></i></div>
+                                <p class="text-white/80 font-medium">Satu platform untuk semua guru, admin, dan kepala
+                                    sekolah.
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <!-- DASHBOARD SHOWCASE -->
+    <section class="py-20 bg-gray-50/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+            <h2 class="text-3xl lg:text-4xl font-display font-extrabold text-gray-950 mb-4">Dashboard Showcase</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto mb-16 font-medium text-sm lg:text-base">Professional cloud-based
+                digital attendance management system.</p>
+
+            <div class="relative max-w-5xl mx-auto">
+                <div class="rounded-3xl border border-gray-100 shadow-premium overflow-hidden bg-white p-2">
+                    <img src="{{ url_for('static', filename='img/dashboard_showcase.png') }}"
+                        alt="Dashboard Full Showcase" class="w-full rounded-2xl">
+                </div>
+
+                <!-- Floating Stats -->
+                <div class="absolute -left-12 top-1/4 animate-float hidden 2xl:block" style="animation-delay: 0.5s">
+                    <div class="p-6 rounded-2xl bg-white shadow-premium border border-gray-100 flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center text-primary-600">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hadir Hari Ini</p>
+                            <p class="text-2xl font-extrabold text-gray-900">94.2%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -right-12 bottom-1/4 animate-float hidden 2xl:block" style="animation-delay: 1s">
+                    <div class="p-6 rounded-2xl bg-white shadow-premium border border-gray-100 flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <i data-lucide="trending-up" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Data Masuk</p>
+                            <p class="text-2xl font-extrabold text-gray-900">1,248</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-20 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+            <h2 class="text-3xl lg:text-4xl font-display font-extrabold text-gray-950 mb-4">Cara Kerja Ebsensy</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto mb-20 font-medium text-sm lg:text-base">Tidak diperlukan pelatihan
+                teknis. Mulai dalam hitungan menit.</p>
+
+            <div class="grid md:grid-cols-3 gap-16 relative">
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center group">
+                    <div class="relative mb-8">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl font-extrabold group-hover:bg-primary-100 group-hover:text-primary-600 transition-all duration-300 z-10 relative shadow-sm">
+                            1</div>
+                        <div class="absolute top-1/2 left-full w-full h-[2px] bg-gray-100 hidden md:block -z-10"></div>
+                    </div>
+                    <h3 class="text-xl font-display font-extrabold text-gray-950 mb-3">Daftarkan Sekolah</h3>
+                    <p class="text-gray-500 text-sm font-medium leading-relaxed">Buat akun dan daftarkan institusi Anda
+                        ke dalam sistem Ebsensy dalam hitungan menit.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center group">
+                    <div class="relative mb-8">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl font-extrabold group-hover:bg-primary-100 group-hover:text-primary-600 transition-all duration-300 z-10 relative shadow-sm">
+                            2</div>
+                        <div class="absolute top-1/2 left-full w-full h-[2px] bg-gray-100 hidden md:block -z-10"></div>
+                    </div>
+                    <h3 class="text-xl font-display font-extrabold text-gray-950 mb-3">Input data Siswa dan Guru</h3>
+                    <p class="text-gray-500 text-sm font-medium leading-relaxed">Masukkan data siswa dan tenaga pengajar
+                        ke dalam sistem manajemen data yang terstruktur.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center group">
+                    <div class="relative mb-8">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl font-extrabold group-hover:bg-primary-100 group-hover:text-primary-600 transition-all duration-300 z-10 relative shadow-sm">
+                            3</div>
+                    </div>
+                    <h3 class="text-xl font-display font-extrabold text-gray-950 mb-3">Mulai Absensi Digital</h3>
+                    <p class="text-gray-500 text-sm font-medium leading-relaxed">Guru mencatat kehadiran langsung dari
+                        browser — kapan saja, tanpa aplikasi tambahan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CHOOSE EBSENSY -->
+    <section id="features" class="py-20 bg-gray-50/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-display font-extrabold text-gray-950 mb-4">Mengapa Institusi
+                    Pendidikan Memilih Ebsensy?</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto font-medium text-sm lg:text-base">Dibangun khusus untuk
+                    kebutuhan administrasi Sekolah IT dan Pesantren di Indonesia.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <!-- Big Feature 1 (ELITE MODE) -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-gray-950 text-white shadow-2xl shadow-gray-950/20 card-hover group relative overflow-hidden">
+                    <!-- copy dari sini -->
+                    <div
+                        class="absolute top-6 right-6 px-4 py-1.5 rounded-full primary-gradient text-[10px] font-bold uppercase tracking-widest text-white shadow-lg">
+                        Fitur Unggulan
+                    </div>
+                    <!-- sampai sini -->
+
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-white/10 text-primary-400 flex items-center justify-center mb-8 group-hover:bg-white group-hover:text-primary-600 transition-all shadow-sm">
+                        <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-extrabold mb-4">Monitoring Hafalan Tahfidz</h3>
+                    <p class="text-white/60 font-medium leading-relaxed">Pantau setoran, progress, dan history hafalan
+                        setiap santri secara terstruktur. Fitur yang hampir tidak ada di aplikasi sekolah lain.</p>
+                </div>
+                <!-- Big Feature 2  -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-premium card-hover group hover:bg-primary-50/50">
+                    <!-- tempat tambah CSS proritas-->
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-white/10 text-primary-400 flex items-center justify-center mb-8 group-hover:bg-white group-hover:text-primary-600 transition-all shadow-sm">
+                        <i data-lucide="cloud" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-extrabold mb-4">Keamanan Data</h3>
+                    <!--ini ubah-->
+                    <p class="text-gray-500 font-medium leading-relaxed">Data sekolah tersimpan aman di cloud dengan
+                        sistem keamanan berlapis.</p>
+                </div>
+                <!-- Big Feature 3 -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-premium card-hover group hover:bg-primary-50/50">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-8 group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="zap" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-extrabold text-gray-950 mb-4">Mudah digunakan</h3>
+                    <p class="text-gray-500 font-medium leading-relaxed">Mudah dioperasikan, sistem akses modern dengan
+                        antarmuka yang ramah pengguna.</p>
+                </div>
+                <!-- Big Feature 4 -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-premium card-hover group hover:bg-primary-50/50">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-8 group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="layers" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-extrabold text-gray-950 mb-4">Arsitektur Multi Sekolah</h3>
+                    <p class="text-gray-500 font-medium leading-relaxed">Satu platform, banyak sekolah. Ebsensy dibangun
+                        dengan isolasi data per institusi — aman, skalabel, dan siap untuk jaringan yayasan besar.</p>
+                </div>
+            </div>
+
+            <!-- Feature Cards Grid (8 items) -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 (PRIORITY MODE) -->
+                <div
+                    class="p-6 rounded-3xl bg-primary-50/50 border-2 border-primary-200 shadow-xl shadow-primary-500/10 card-hover flex flex-col gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0">
+                        <div
+                            class="bg-primary-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl rounded-tr-3xl uppercase tracking-widest">
+                            Fitur Unggulan</div>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-white text-primary-600 flex items-center justify-center shadow-sm">
+                        <i data-lucide="gauge" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Dashboard Real-time</h4>
+                    <p class="text-xs text-primary-900/60 font-semibold leading-relaxed">Pantau data kehadiran secara
+                        langsung dengan visualisasi yang cerdas.</p>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="p-6 rounded-3xl bg-primary-50/50 border-2 border-primary-200 shadow-xl shadow-primary-500/10 card-hover flex flex-col gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0">
+                        <div
+                            class="bg-primary-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl rounded-tr-3xl uppercase tracking-widest">
+                            Fitur Unggulan</div>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-white text-primary-600 flex items-center justify-center shadow-sm">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Raport Pintar</h4>
+                    <p class="text-xs text-primary-900/60 font-semibold leading-relaxed">Raport lengkap mencakup nilai
+                        akademik, capaian hafalan, catatan adab, dan perkembangan santri — rapi dan siap cetak.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="p-6 rounded-3xl bg-primary-50/50 border-2 border-primary-200 shadow-xl shadow-primary-500/10 card-hover flex flex-col gap-4 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0">
+                        <div
+                            class="bg-primary-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl rounded-tr-3xl uppercase tracking-widest">
+                            Fitur Unggulan</div>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-white text-primary-600 flex items-center justify-center shadow-sm">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Absensi & Hafalan Terintegrasi</h4>
+                    <p class="text-xs text-primary-900/60 font-semibold leading-relaxed">Data kehadiran dan perkembangan
+                        hafalan saling terhubung dalam satu sistem — tidak perlu aplikasi terpisah.
+                    </p>
+                </div>
+
+
+                <!-- Card 4 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Data Siswa & Guru</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Manage records for students and
+                        teachers.</p>
+                </div>
+                <!-- Card 5 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Multi Akun</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Separate access for admin and teachers.
+                    </p>
+                </div>
+                <!-- Card 6 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="school" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Multi Sekolah</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Tenant management for school networks.
+                    </p>
+                </div>
+                <!-- Card 6 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Laporan Terstruktur</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Organized reports based on needs.</p>
+                </div>
+                <!-- Card 7 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Cloud Secure</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Encrypted data storage on cloud.</p>
+                </div>
+                <!-- Card 8 -->
+                <div
+                    class="p-6 rounded-3xl bg-white border border-gray-50 shadow-sm card-hover flex flex-col gap-4 group hover:bg-primary-50/30">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gray-50 text-primary-600 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                        <i data-lucide="smile" class="w-5 h-5"></i>
+                    </div>
+                    <h4 class="text-base font-display font-extrabold text-gray-950">Mudah Digunakan</h4>
+                    <p class="text-xs text-gray-400 font-medium leading-relaxed">Simple UI for everyone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section id="pricing" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
+            <h2 class="text-3xl lg:text-4xl font-display font-extrabold text-gray-950 mb-4">Harga Transparan, Tanpa
+                Biaya Tersembunyi</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto mb-20 font-medium text-sm lg:text-base">Pilih paket yang sesuai
+                dengan skala institusi Anda. Semua paket sudah mencakup fitur inti Ebsensy.</p>
+
+            <div class="grid md:grid-cols-3 gap-8 items-start max-w-6xl mx-auto">
+                <!-- Basic -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-premium card-hover flex flex-col text-left">
+                    <h3 class="text-xl font-display font-extrabold text-gray-950 mb-2">Beta</h3>
+                    <p class="text-gray-400 text-sm font-medium mb-8">Coba Gratis 30 Hari.</p>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-5xl font-extrabold text-gray-950">Gratis</span>
+                        <span class="text-gray-400 font-bold text-lg">/30 hari</span>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-grow">
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Absensi siswa basic
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Input hafalan sederhana
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Dashboard guru basic
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Maksimal 100 siswa
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            1 admin
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            3 akun guru
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Rekap absensi sederhana
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Monitoring wali basic
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Export PDF basic
+                        </li>
+                    </ul>
+                    <a href="#"
+                        class="w-full py-4 text-center border border-gray-100 rounded-2xl font-bold text-gray-950 hover:bg-gray-50 transition-all">Coba
+                        Demo Gratis</a>
+                </div>
+
+                <!-- Pro -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-gray-950 text-white shadow-2xl shadow-gray-950/40 relative transform lg:scale-105 z-10 flex flex-col text-left">
+                    <div
+                        class="absolute -top-5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full primary-gradient text-white text-[10px] font-bold uppercase tracking-widest border-4 border-white">
+                        Terpopuler</div>
+                    <h3 class="text-xl font-display font-extrabold mb-2 text-white">Pro</h3>
+                    <p class="text-white/50 text-sm font-medium mb-8">Cocok untuk Sekolah IT, Madrasah, dan
+                        Pesantren Modern yang ingin monitoring santri lebih rapi, realtime, dan terintegrasi.</p>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-5xl font-extrabold text-white">Rp 499k</span>
+                        <span class="text-white/40 font-bold text-lg">/bulan</span>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-grow">
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Semua fitur Free
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Mendukung hingga ribuan data siswa
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Multi guru & musyrif
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Dashboard wali realtime
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Grafik perkembangan hafalan
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Analitik absensi
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Sistem ujian & nilai
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Raport akademik
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Raport tahfidz
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Export PDF premium
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-white/80">
+                            <i data-lucide="check" class="w-4 h-4 text-primary-400"></i>
+                            Fitur Premium lainnya
+                        </li>
+                    </ul>
+                    <a href="#"
+                        class="w-full py-4 text-center bg-white text-gray-950 rounded-2xl font-bold hover:bg-gray-50 transition-all">Coba
+                        Sekarang</a>
+                </div>
+
+                <!-- Enterprise -->
+                <div
+                    class="p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-premium card-hover flex flex-col text-left">
+                    <h3 class="text-xl font-display font-extrabold text-gray-950 mb-2">Enterprise</h3>
+                    <p class="text-gray-400 text-sm font-medium mb-8">Untuk kebutuhan skala besar atau konfigurasi
+                        khusus. Hubungi tim kami untuk penawaran khusus sesuai skala institusi Anda.</p>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-4xl font-extrabold text-gray-950">Custom</span>
+                        <span class="text-gray-400 font-bold text-lg"></span>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-grow">
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Semua fitur pro
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Multi cabang sekolah
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Multi tenant management
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Custom branding/logo
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            API integration
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            WhatsApp gateway integration
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Audit logs
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            SLA support
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Dedicated onboarding
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Custom laporan
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Backup priority
+                        </li>
+                        <li class="flex items-center gap-3 text-sm font-semibold text-gray-600">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+                            Fitur Enterprise lainya
+                        </li>
+                    </ul>
+                    <a href="#"
+                        class="w-full py-4 text-center border border-gray-100 rounded-2xl font-bold text-gray-950 hover:bg-gray-50 transition-all">Hubungi
+                        Kami</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-20 bg-gray-50/30">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-display font-extrabold text-gray-950 mb-4">FAQ</h2>
+                <p class="text-gray-500 font-medium text-sm">Pertanyaan yang sering diajukan seputar Ebsensy</p>
+            </div>
+
+            <div class="space-y-4">
+                <details class="group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm cursor-pointer" open>
+                    <summary class="list-none flex items-center justify-between font-bold text-gray-950">
+                        Apa itu modernir absensy Ebsensy?
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed font-medium">Ebsensy membantu sekolah mencatat absensi
+                        dan memantau data harian secara digital melalui platform cloud yang aman dan mudah diakses.</p>
+                </details>
+
+                <details class="group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm cursor-pointer">
+                    <summary class="list-none flex items-center justify-between font-bold text-gray-950">
+                        Bagaimana sistem ebsensy bekerja?
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed font-medium">Admin sekolah membuat data, guru menginput
+                        absensi melalui panel yang intuitif, dan pimpinan sekolah dapat memantau ringkasan secara
+                        real-time.</p>
+                </details>
+
+                <details class="group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm cursor-pointer">
+                    <summary class="list-none flex items-center justify-between font-bold text-gray-950">
+                        Apakah data aman tersimpan?
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-500 leading-relaxed font-medium">Ya, data disimpan dalam server cloud yang
+                        terenkripsi dan dipisahkan antar unit sekolah untuk menjamin privasi dan keamanan data.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="py-24 px-6">
+        <div
+            class="max-w-7xl mx-auto rounded-[3rem] primary-gradient p-12 lg:p-24 text-center relative overflow-hidden shadow-2xl shadow-primary-900/40">
+            <div class="relative z-10">
+                <span class="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-6 block">...</span>
+                <h2 class="text-3xl lg:text-5xl font-display font-extrabold text-white mb-8 leading-tight">
+                    Siap Membawa Absensi Sekolah Anda <br class="hidden lg:block" /> ke Era Digital?
+                </h2>
+                <p class="text-white/70 text-base lg:text-lg mb-10 max-w-2xl mx-auto">
+                    Bergabunglah dengan institusi pendidikan yang telah mempercayakan administrasi kehadiran mereka
+                    kepada Ebsensy.
+                </p>
+                <a href="#"
+                    class="inline-flex items-center gap-3 px-10 py-5 bg-white text-primary-600 rounded-2xl font-extrabold text-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                    Mulai Gratis Sekarang
+                    <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="bg-white pt-24 pb-12 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+            <div class="space-y-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center">
+                        <i data-lucide="graduation-cap" class="text-white w-6 h-6"></i>
+                    </div>
+                    <span class="text-2xl font-display font-extrabold tracking-tight text-primary-600">e<span
+                            class="text-2xl font-display font-extrabold tracking-tight text-gray-900">bsensy</span></span>
+                </div>
+                <p class="text-gray-500 font-medium text-sm leading-relaxed">
+                    Platform Absensi Digital
+                    oleh zamify
+                    <br>
+                    Sistem absensi berbasis cloud untuk
+                    sekolah dan pesantren modern.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-display font-extrabold text-gray-900 mb-6">Beranda</h4>
+                <ul class="space-y-4 text-gray-500 font-medium text-sm">
+                    <li><a href="#features" class="hover:text-primary-600 transition-colors">Fitur</a></li>
+                    <li><a href="#solution" class="hover:text-primary-600 transition-colors">Solusi</a></li>
+                    <li><a href="#pricing" class="hover:text-primary-600 transition-colors">Harga</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-display font-extrabold text-gray-900 mb-6">Solusi</h4>
+                <ul class="space-y-4 text-gray-500 font-medium text-sm">
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Sekolah</a></li>
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Multi Otomatis</a></li>
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Multi Sekolah</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-display font-extrabold text-gray-900 mb-6">Kontak</h4>
+                <ul class="space-y-4 text-gray-500 font-medium text-sm">
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Kontak</a></li>
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Fitur</a></li>
+                    <li><a href="#" class="hover:text-primary-600 transition-colors">Pertanyaan</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div
+            class="max-w-7xl mx-auto px-6 lg:px-12 pt-10 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 text-gray-500 text-sm font-medium">
+            <p>© 2026 zamify · All rights reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="#" class="hover:text-primary-600 transition-colors">Syarat & ketentuan</a>
+                <a href="#" class="hover:text-primary-600 transition-colors">Kebijakan privasi</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide -->
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

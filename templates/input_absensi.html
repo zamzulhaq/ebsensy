@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block title %}Input Absensi - {{ class_name }}{% endblock %}
+{% block head %}
+<style>
+    .attendance-radio {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .attendance-option {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .attendance-option.is-active[data-status="Hadir"] {
+        background: #10B981 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, .22);
+    }
+
+    .attendance-option.is-active[data-status="Sakit"] {
+        background: #F59E0B !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(245, 158, 11, .22);
+    }
+
+    .attendance-option.is-active[data-status="Izin"] {
+        background: #3B82F6 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, .22);
+    }
+
+    .attendance-option.is-active[data-status="Alfa"] {
+        background: #F43F5E !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(244, 63, 94, .22);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pb-safe">
+
+    <!-- iOS Header -->
+    <div class="ios-header md:hidden">
+        <a href="{{ url_for('guru_dashboard') }}" class="ios-back-btn"><i class="fas fa-chevron-left"></i> Dashboard</a>
+        <span class="ios-header-title">Absensi</span>
+    </div>
+
+    <!-- MOBILE VIEW -->
+    <div class="md:hidden px-4 py-3">
+        <!-- Info Bar -->
+        <div style="background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-widest" style="color:#8E8E93">Kelas</p>
+                <p class="font-extrabold" style="color:#1C1C1E;font-size:16px">{{ class_name }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-bold uppercase tracking-widest" style="color:#8E8E93">Tanggal</p>
+                <p class="font-bold text-sm" style="color:#1C1C1E">{{ today }}</p>
+            </div>
+        </div>
+
+        <!-- Quick Action -->
+        <button type="button" onclick="markAll('Hadir')" style="width:100%;height:44px;background:#D1FAE5;border:none;border-radius:12px;font-weight:700;font-size:14px;color:#065F46;margin-bottom:12px;cursor:pointer">
+            <i class="fas fa-check-double mr-2"></i> Semua Hadir
+        </button>
+
+        <!-- Form -->
+        <form action="{{ url_for('input_absensi', class_id=class_id) }}" method="POST" class="space-y-3">
+            {% for student in students %}
+            {% set current_status = existing_att.get(student.id, 'Hadir') %}
+            <div style="background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+                <div class="flex items-center gap-3 mb-3">
+                    <div style="width:38px;height:38px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#D97706;font-size:16px;flex-shrink:0">
+                        {{ student.name[0] }}
+                    </div>
+                    <span class="font-bold" style="color:#1C1C1E">{{ student.name }}</span>
+                </div>
+                <!-- Status Pills -->
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+                    <input type="radio" name="status_{{ student.id }}" value="Hadir" id="m_h_{{ student.id }}" class="attendance-radio" {% if current_status == 'Hadir' %}checked{% endif %}>
+                    <label for="m_h_{{ student.id }}" class="status-pill attendance-option" data-status="Hadir" style="text-align:center;padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;background:#F2F2F7;color:#8E8E93;transition:all .15s;border:2px solid transparent">Hadir</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Sakit" id="m_s_{{ student.id }}" class="attendance-radio" {% if current_status == 'Sakit' %}checked{% endif %}>
+                    <label for="m_s_{{ student.id }}" class="status-pill attendance-option" data-status="Sakit" style="text-align:center;padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;background:#F2F2F7;color:#8E8E93;transition:all .15s;border:2px solid transparent">Sakit</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Izin" id="m_i_{{ student.id }}" class="attendance-radio" {% if current_status == 'Izin' %}checked{% endif %}>
+                    <label for="m_i_{{ student.id }}" class="status-pill attendance-option" data-status="Izin" style="text-align:center;padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;background:#F2F2F7;color:#8E8E93;transition:all .15s;border:2px solid transparent">Izin</label>
+
+                    <input type="radio" name="status_{{ student.id }}" value="Alfa" id="m_a_{{ student.id }}" class="attendance-radio" {% if current_status == 'Alfa' %}checked{% endif %}>
+                    <label for="m_a_{{ student.id }}" class="status-pill attendance-option" data-status="Alfa" style="text-align:center;padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;background:#F2F2F7;color:#8E8E93;transition:all .15s;border:2px solid transparent">Alfa</label>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Sticky Submit -->
+            <div class="fixed bottom-0 left-0 right-0 p-4" style="background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.06);padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))">
+                <button type="submit" style="width:100%;height:52px;background:#F59E0B;color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer">
+                    <i class="fas fa-cloud-arrow-up mr-2"></i> Simpan Laporan Absensi
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- DESKTOP VIEW -->
+    <div class="hidden md:block max-w-5xl mx-auto px-8 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-4">
+                <div style="width:52px;height:52px;background:#DBEAFE;border-radius:14px;display:flex;align-items:center;justify-content:center">
+                    <i class="fas fa-clipboard-user text-xl" style="color:#1D4ED8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold" style="color:#1C1917">Absensi: {{ class_name }}</h1>
+                    <p class="text-xs font-bold uppercase tracking-widest" style="color:#A8A29E">Sesi: {{ today }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="markAll('Hadir')" class="d-btn-secondary" style="border-color:#BBF7D0;color:#059669">
+                    <i class="fas fa-check-double"></i> Semua Hadir
+                </button>
+                <a href="{{ url_for('guru_dashboard') }}" class="d-btn-secondary">Batal</a>
+            </div>
+        </div>
+
+        <form action="{{ url_for('input_absensi', class_id=class_id) }}" method="POST">
+            <div class="desktop-card overflow-hidden mb-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left d-table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">No</th>
+                                <th>Nama Siswa</th>
+                                <th class="text-center">Status Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            {% set current_status = existing_att.get(student.id, 'Hadir') %}
+                            <tr>
+                                <td class="text-sm font-bold" style="color:#A8A29E">{{ loop.index }}</td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div style="width:36px;height:36px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-weight:800;color:#D97706">
+                                            {{ student.name[0] }}
+                                        </div>
+                                        <span class="font-bold text-sm" style="color:#1C1917">{{ student.name }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex justify-center gap-2">
+                                        <div style="display:flex;background:#F5F5F4;padding:4px;border-radius:12px;gap:4px">
+                                            <input type="radio" name="status_{{ student.id }}" value="Hadir" id="d_h_{{ student.id }}" class="attendance-radio" {% if current_status == 'Hadir' %}checked{% endif %}>
+                                            <label for="d_h_{{ student.id }}" class="attendance-option px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400 hover:text-slate-600" data-status="Hadir">Hadir</label>
+
+                                            <input type="radio" name="status_{{ student.id }}" value="Sakit" id="d_s_{{ student.id }}" class="attendance-radio" {% if current_status == 'Sakit' %}checked{% endif %}>
+                                            <label for="d_s_{{ student.id }}" class="attendance-option px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400 hover:text-slate-600" data-status="Sakit">Sakit</label>
+
+                                            <input type="radio" name="status_{{ student.id }}" value="Izin" id="d_i_{{ student.id }}" class="attendance-radio" {% if current_status == 'Izin' %}checked{% endif %}>
+                                            <label for="d_i_{{ student.id }}" class="attendance-option px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400 hover:text-slate-600" data-status="Izin">Izin</label>
+
+                                            <input type="radio" name="status_{{ student.id }}" value="Alfa" id="d_a_{{ student.id }}" class="attendance-radio" {% if current_status == 'Alfa' %}checked{% endif %}>
+                                            <label for="d_a_{{ student.id }}" class="attendance-option px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all text-slate-400 hover:text-slate-600" data-status="Alfa">Alfa</label>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="submit" class="d-btn-primary px-12 py-4 text-base">
+                    <i class="fas fa-cloud-arrow-up"></i> Simpan Laporan Absensi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function syncAttendanceOptions() {
+        document.querySelectorAll('input[type="radio"][name^="status_"]').forEach(radio => {
+            const label = document.querySelector(`label[for="${radio.id}"]`);
+            if (label) {
+                label.classList.toggle('is-active', radio.checked);
+            }
+        });
+    }
+
+    function markAll(status) {
+        const radios = document.querySelectorAll(`input[value="${status}"]`);
+        radios.forEach(radio => {
+            radio.checked = true;
+        });
+        syncAttendanceOptions();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="radio"][name^="status_"]').forEach(radio => {
+            radio.addEventListener('change', syncAttendanceOptions);
+        });
+        document.querySelectorAll('.attendance-option').forEach(label => {
+            label.addEventListener('click', () => {
+                const radio = document.getElementById(label.getAttribute('for'));
+                if (radio) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        });
+        syncAttendanceOptions();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,444 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Dashboard Wali Murid - Ebsensy{% endblock %}
+{% block header_title %}Portal Wali Murid{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-7xl mx-auto space-y-6 pb-20 md:pb-10 font-sans text-slate-800">
+
+    <!-- 1. Welcome Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-[2rem] p-8 md:p-10 shadow-xl shadow-blue-500/20 relative overflow-hidden">
+        <!-- Abstract Decoration -->
+        <div class="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-48 h-48 bg-indigo-400/20 rounded-full blur-2xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div class="w-28 h-28 rounded-full bg-white/20 p-2 flex-shrink-0 backdrop-blur-sm border border-white/30 shadow-2xl">
+                <div class="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                    <img src="https://ui-avatars.com/api/?name={{ absensi[0].student_name if absensi else 'Ananda' }}&background=E0F2FE&color=0284C7&size=150" alt="Foto Santri" class="w-full h-full object-cover">
+                </div>
+            </div>
+            
+            <div class="text-center md:text-left flex-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-black uppercase tracking-widest mb-3 border border-white/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Sistem Terkoneksi
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Ahlan wa Sahlan, Bapak/Ibu!</h1>
+                <p class="text-blue-100 text-lg font-medium mb-4">Berikut adalah perkembangan ananda tercinta hari ini.</p>
+                
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                    <div class="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl text-white text-sm font-bold border border-white/10">
+                        <i class="fas fa-user-graduate mr-2 opacity-70"></i> {{ absensi[0].student_name if absensi else 'Azzam Fatih' }}
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl text-white text-sm font-bold border border-white/10">
+                        <i class="fas fa-users-rectangle mr-2 opacity-70"></i> Kelas 7A Tahfidz
+                    </div>
+                    <div class="bg-emerald-500/20 backdrop-blur-sm px-4 py-2 rounded-xl text-emerald-100 text-sm font-bold border border-emerald-500/30">
+                        <i class="fas fa-check-circle mr-2"></i> Hadir di Sekolah
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Statistik Utama -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Kehadiran -->
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kehadiran Bulan Ini</p>
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <p class="text-3xl font-black text-slate-900">{{ stats.present_count|default('24') }}</p>
+                <p class="text-sm font-bold text-slate-400 mb-1">/ {{ stats.total_absensi|default('26') }} Hari</p>
+            </div>
+            <div class="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full w-[92%]"></div>
+            </div>
+        </div>
+
+        <!-- Hafalan -->
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    <i class="fas fa-book-quran"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hafalan Minggu Ini</p>
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <p class="text-3xl font-black text-slate-900">+{{ stats.total_hafalan|default('3') }}</p>
+                <p class="text-sm font-bold text-slate-400 mb-1">Halaman</p>
+            </div>
+            <p class="text-xs font-bold text-emerald-500 mt-3 flex items-center gap-1">
+                <i class="fas fa-arrow-trend-up"></i> Di Atas Target
+            </p>
+        </div>
+
+        <!-- Nilai Rata-rata -->
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nilai Rata-Rata</p>
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <p class="text-3xl font-black text-slate-900">89.5</p>
+                <p class="text-sm font-bold text-slate-400 mb-1">Predikat A</p>
+            </div>
+            <p class="text-xs font-bold text-amber-500 mt-3 flex items-center gap-1">
+                <i class="fas fa-award"></i> Peringkat 5 Besar
+            </p>
+        </div>
+
+        <!-- Target Hafalan -->
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                    <i class="fas fa-bullseye-arrow"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Hafalan</p>
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <p class="text-3xl font-black text-slate-900">5</p>
+                <p class="text-sm font-bold text-slate-400 mb-1">Juz Selesai</p>
+            </div>
+            <p class="text-xs font-bold text-slate-400 mt-3 flex items-center gap-1">
+                Target Semester: 6 Juz
+            </p>
+        </div>
+    </div>
+
+    <!-- Middle Section: Chart & Today's Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 3. Grafik Interaktif -->
+        <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 md:p-8 flex flex-col">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900">Grafik Perkembangan</h2>
+                    <p class="text-sm font-medium text-slate-500">Pilih tab untuk melihat detail grafik.</p>
+                </div>
+                
+                <!-- Custom Tabs -->
+                <div class="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 overflow-x-auto custom-scrollbar">
+                    <button onclick="switchChartTab('kehadiran')" id="tab_kehadiran" class="chart-tab active flex-1 px-4 py-2 rounded-xl text-xs font-bold bg-white text-blue-600 shadow-sm transition-all whitespace-nowrap">Kehadiran</button>
+                    <button onclick="switchChartTab('hafalan')" id="tab_hafalan" class="chart-tab flex-1 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">Hafalan</button>
+                    <button onclick="switchChartTab('nilai')" id="tab_nilai" class="chart-tab flex-1 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">Nilai</button>
+                    <button onclick="switchChartTab('progress')" id="tab_progress" class="chart-tab flex-1 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap">Progress Anak</button>
+                </div>
+            </div>
+            
+            <div class="flex-1 min-h-[300px] relative w-full">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Right Column: Today & Notes -->
+        <div class="space-y-6">
+            
+            <!-- Quick Menu -->
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+                <h3 class="text-sm font-black text-slate-900 mb-4 uppercase tracking-widest">Akses Cepat</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="#" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors group">
+                        <i class="fas fa-calendar-check mb-2"></i>
+                        <span class="text-[10px] font-bold">Absensi</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-colors group">
+                        <i class="fas fa-book-quran mb-2"></i>
+                        <span class="text-[10px] font-bold">Hafalan</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white transition-colors group">
+                        <i class="fas fa-file-signature mb-2"></i>
+                        <span class="text-[10px] font-bold">Raport</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-colors group">
+                        <i class="fas fa-envelope-open-text mb-2"></i>
+                        <span class="text-[10px] font-bold">Perizinan</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Catatan Guru -->
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[2rem] border border-blue-100 p-6 relative overflow-hidden">
+                <i class="fas fa-quote-right absolute right-4 top-4 text-4xl text-blue-500/10"></i>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-black text-xs">UA</div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">Ust. Ahmad</h3>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Wali Kelas / Musyrif</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <p class="text-sm text-slate-700 font-medium leading-relaxed italic">
+                        "Alhamdulillah, perkembangan hafalan ananda minggu ini sangat baik. Tajwid dan makharijul huruf semakin sempurna. Mohon doa dan motivasi dari Bapak/Ibu di rumah agar ananda tetap istiqomah."
+                    </p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="px-2 py-1 bg-white rounded-lg text-[9px] font-black text-blue-600 uppercase tracking-widest shadow-sm">Evaluasi Mingguan</span>
+                        <span class="text-[9px] font-bold text-slate-400">14 Mei 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengumuman Sekolah -->
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-50 bg-slate-50/50">
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-bullhorn text-orange-500"></i> Pengumuman
+                    </h3>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 flex-shrink-0">
+                            <i class="fas fa-calendar-star"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900">Pembagian Raport Semester Ganjil</p>
+                            <p class="text-xs text-slate-500 mt-1">Undangan pengambilan raport akan dilaksanakan secara tatap muka pada 20 Mei 2026.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Log Absensi (Aktivitas) -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+            <div class="p-6 md:p-8 border-b border-slate-50 flex-shrink-0">
+                <h3 class="text-lg font-black text-slate-900">Log Absensi</h3>
+                <p class="text-xs font-medium text-slate-500 mt-1">Riwayat kehadiran ananda.</p>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+                {% if absensi %}
+                <div class="relative border-l-2 border-slate-100 ml-3 space-y-6">
+                    {% for item in absensi %}
+                    <div class="relative pl-6">
+                        {% if item.status == 'Hadir' %}
+                            <div class="absolute w-4 h-4 bg-emerald-500 rounded-full border-4 border-white -left-[9px] top-1 shadow-sm"></div>
+                        {% elif item.status == 'Alfa' %}
+                            <div class="absolute w-4 h-4 bg-rose-500 rounded-full border-4 border-white -left-[9px] top-1 shadow-sm"></div>
+                        {% else %}
+                            <div class="absolute w-4 h-4 bg-amber-500 rounded-full border-4 border-white -left-[9px] top-1 shadow-sm"></div>
+                        {% endif %}
+                        <p class="text-[10px] font-bold text-slate-400 mb-1">{{ item.date }}</p>
+                        <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            Absensi: <span class="{% if item.status == 'Hadir' %}text-emerald-500{% elif item.status == 'Alfa' %}text-rose-500{% else %}text-amber-500{% endif %}">{{ item.status }}</span>
+                        </h4>
+                        {% if item.keterangan %}
+                            <p class="text-xs text-slate-500 mt-1 italic">"{{ item.keterangan }}"</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-history text-4xl text-slate-200 mb-3"></i>
+                    <p class="text-sm font-bold text-slate-400">Belum ada riwayat absensi.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Jadwal Pelajaran -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-6 md:p-8 border-b border-slate-50">
+                <h3 class="text-lg font-black text-slate-900">Jadwal Hari Ini</h3>
+                <p class="text-xs font-medium text-slate-500 mt-1">Mata pelajaran yang diikuti ananda.</p>
+            </div>
+            <div class="flex-1 p-0">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                            <th class="px-6 py-4 w-24">Waktu</th>
+                            <th class="px-6 py-4">Mata Pelajaran</th>
+                            <th class="px-6 py-4 hidden md:table-cell">Guru</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-500">07:30</td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-slate-900">Tahfidz Al-Quran</p>
+                                <p class="text-xs text-slate-500 md:hidden mt-1">Ust. Ahmad</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium text-slate-600 hidden md:table-cell">Ust. Ahmad</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-500">09:00</td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-slate-900">Bahasa Arab</p>
+                                <p class="text-xs text-slate-500 md:hidden mt-1">Ust. Budi</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium text-slate-600 hidden md:table-cell">Ust. Budi</td>
+                        </tr>
+                        <tr class="bg-slate-50/50">
+                            <td class="px-6 py-3 text-xs font-bold text-amber-500 text-center" colspan="3">
+                                <i class="fas fa-clock mr-2"></i> 10:30 - Istirahat & Sholat Dhuha
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 text-xs font-bold text-slate-500">11:00</td>
+                            <td class="px-6 py-4">
+                                <p class="text-sm font-bold text-slate-900">Fiqih Ibadah</p>
+                                <p class="text-xs text-slate-500 md:hidden mt-1">Ust. Sholeh</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium text-slate-600 hidden md:table-cell">Ust. Sholeh</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Chart.js & Logic -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Tab Switching UI
+    const tabs = document.querySelectorAll('.chart-tab');
+    
+    window.switchChartTab = function(tabName) {
+        tabs.forEach(t => {
+            if (t.id === `tab_${tabName}`) {
+                t.className = 'chart-tab active flex-1 px-4 py-2 rounded-xl text-xs font-bold bg-white text-blue-600 shadow-sm transition-all whitespace-nowrap';
+            } else {
+                t.className = 'chart-tab flex-1 px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-all whitespace-nowrap';
+            }
+        });
+        
+        updateChartData(tabName);
+    };
+
+    // Chart Setup
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    // Dummy Data for demonstration
+    const chartDataSources = {
+        kehadiran: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+            datasets: [{
+                label: 'Hadir',
+                data: [1, 1, 1, 1, 0, 1],
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#10B981'
+            }]
+        },
+        hafalan: {
+            labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'],
+            datasets: [{
+                label: 'Ziyadah (Halaman)',
+                data: [4, 5, 3, 6],
+                borderColor: '#8B5CF6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#8B5CF6'
+            }]
+        },
+        nilai: {
+            labels: ['B.Arab', 'Fiqih', 'Aqidah', 'Tahfidz', 'Hadits'],
+            datasets: [{
+                label: 'Nilai Terakhir',
+                data: [85, 90, 88, 95, 82],
+                borderColor: '#F59E0B',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#F59E0B'
+            }]
+        },
+        progress: {
+            labels: ['Kehadiran', 'Kerapian', 'Akhlaq', 'Keaktifan', 'Hafalan'],
+            datasets: [{
+                label: 'Skor Karakter (0-100)',
+                data: [95, 85, 90, 80, 95],
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderWidth: 3,
+                tension: 0.1,
+                fill: true,
+                pointBackgroundColor: '#3B82F6'
+            }]
+        }
+    };
+
+    let mainChart = new Chart(ctx, {
+        type: 'line',
+        data: chartDataSources.kehadiran,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E293B',
+                    titleColor: '#fff',
+                    bodyColor: '#e2e8f0',
+                    padding: 12,
+                    displayColors: false,
+                    cornerRadius: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: { font: { weight: 'bold' }, color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { weight: 'bold' }, color: '#94a3b8' }
+                }
+            }
+        }
+    });
+
+    function updateChartData(tabName) {
+        const newData = chartDataSources[tabName];
+        
+        // Change chart type for specific tabs if needed
+        if(tabName === 'progress') {
+            mainChart.config.type = 'radar';
+            mainChart.options.scales.x.display = false;
+            mainChart.options.scales.y.display = false;
+        } else if (tabName === 'nilai') {
+            mainChart.config.type = 'bar';
+            mainChart.options.scales.x.display = true;
+            mainChart.options.scales.y.display = true;
+        } else {
+            mainChart.config.type = 'line';
+            mainChart.options.scales.x.display = true;
+            mainChart.options.scales.y.display = true;
+        }
+
+        mainChart.data = newData;
+        mainChart.update();
+    }
+});
+</script>
+{% endblock %}

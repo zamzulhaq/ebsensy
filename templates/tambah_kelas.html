@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Kelas Baru - Sistem Absensi</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            --indigo-soft: #eef2ff;
+            --text-dark: #1e293b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+        }
+        .container {
+            max-width: 500px;
+        }
+        .card {
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            border-bottom: none;
+        }
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            backdrop-filter: blur(4px);
+        }
+        .icon-box i {
+            font-size: 1.75rem;
+        }
+        .card-body {
+            padding: 2.5rem;
+            background: white;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .input-group-text {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #94a3b8;
+            padding-left: 1.25rem;
+            padding-right: 0.75rem;
+        }
+        .form-control {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background-color: #fff;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.1);
+            opacity: 0.95;
+        }
+        .btn-light {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: none;
+        }
+        .btn-light:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+        .alert {
+            border-radius: 1rem;
+            border: none;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .input-group {
+            border-radius: 0.875rem;
+            overflow: hidden;
+        }
+        .input-group .form-control {
+            border-left: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas {% if category == 'danger' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %} fs-5 me-3"></i>
+                            <div>{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <div class="icon-box">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-1">Tambah Kelas</h2>
+                <p class="text-white-50 small mb-0">Daftarkan kelas baru ke sekolah Anda</p>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('tambah_kelas') }}" method="POST">
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Nama Kelas</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-tag"></i>
+                            </span>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Misal: 10-A, 11-IPA-1" required autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="level" class="form-label">Tingkat (Level)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-layer-group"></i>
+                            </span>
+                            <input type="number" class="form-control" id="level" name="level" placeholder="Misal: 10, 11, 12" min="1" max="13" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-5">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Simpan Kelas
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

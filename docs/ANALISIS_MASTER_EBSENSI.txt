@@ -1,0 +1,409 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║           ANALISIS MASTER — EBSENSI SaaS APK                                   ║
+║           Dibuat untuk Tim Programmer | Cross-Check & Review                   ║
+║           Tanggal Analisis: 28 Mei 2026                                         ║
+║           Status: READ-ONLY — TIDAK ADA KODE YANG DIUBAH                       ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+CATATAN PENTING UNTUK TIM:
+File ini adalah PANDUAN NAVIGASI saja. Tidak ada satu baris kode pun yang diubah.
+Tanda [🔴 RISIKO], [🟡 PERLU CEK], [🟢 AMAN] adalah label analisis, BUKAN instruksi ubah kode.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN A — PETA UMUM: ISI PER FILE DAN FOLDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STRUKTUR ROOT PROJECT
+├── app.py                  [CORE] Pusat aplikasi Flask — 1626 baris, 43 route
+├── .env                    [🔴 SENSITIF] Berisi API key Supabase & Secret Key Flask
+├── ebsensy                 [❓ FILE KOSONG] Tidak berisi konten, kemungkinan marker
+├── update_subjects.sql     [SQL] Script update kolom tabel subjects
+├── test_login_db.py        [TEST] Tes koneksi login ke database
+├── test_reset.py           [TEST] Tes reset password
+│
+├── auth/                   [MODUL AUTH LEGACY]
+│   ├── auth.py             Kelas AuthHelper (login, logout, redirect per role)
+│   ├── middleware.py       Decorator login_required & role_required
+│   ├── routes.py           Blueprint auth — route login guru, login umum, change password
+│   ├── service.py          AuthService + TeacherAuthService (legacy hash password)
+│   ├── repository.py       TeacherAuthRepository (query teacher_accounts)
+│   └── utils.py            Utility auth (kecil, ~322 bytes)
+│
+├── database/
+│   └── migrations/
+│       ├── 01_create_teacher_accounts.sql   Tabel teacher_accounts (UUID, hash password)
+│       ├── 02_multi_role_system.sql         Tabel teacher_roles (multi-role guru)
+│       └── 03_subject_based_system.sql      Tabel assignments + kolom subject di absensi
+│
+├── domains/                [DOMAIN-DRIVEN DESIGN — MODULAR]
+│   ├── academic/
+│   │   ├── repositories/academic_repo.py    Query DB: subjects, exams, absensi, assignments
+│   │   ├── routes/academic_routes.py        Route Blueprint: /academic/* (20KB, besar)
+│   │   ├── services/academic_service.py     Logic bisnis akademik
+│   │   └── validators/academic_validator.py Validasi input akademik
+│   │
+│   ├── auth/
+│   │   ├── repositories/auth_repo.py        Query profil user SaaS
+│   │   ├── routes/saas_auth_routes.py       Route onboarding sekolah baru
+│   │   ├── services/onboarding_service.py   Logic daftar sekolah baru ke SaaS
+│   │   └── templates/auth/register_saas.html
+│   │
+│   ├── halaqoh/
+│   │   ├── repositories/halaqoh_repo.py     Query data halaqoh & nilai quran
+│   │   ├── routes/halaqoh_routes.py         Route Blueprint: /halaqoh/*
+│   │   ├── services/halaqoh_service.py      Logic bisnis halaqoh (ujian, nilai)
+│   │   └── validators/halaqoh_validator.py
+│   │   └── templates/halaqoh/              5 file HTML (exams, form, grades, master, reports)
+│   │
+│   ├── landing/
+│   │   └── routes.py                        Route landing page (/)
+│   │
+│   ├── subscriptions/
+│   │   ├── decorators/subscription_decorators.py  Decorator @feature_required
+│   │   ├── repositories/subscription_repo.py      Query subscription plans & usage
+│   │   ├── routes/subscription_routes.py           Route /subscriptions/pricing
+│   │   └── services/subscription_service.py        Logic cek limit & expire plan
+│   │
+│   └── wali/
+│       ├── repositories/wali_repo.py        Query relasi wali-siswa + absensi
+│       ├── routes/wali_routes.py            Route Blueprint: /wali/*
+│       ├── services/wali_service.py         Logic dashboard orang tua (chart, stats)
+│       └── templates/wali/                 3 file HTML (form, list, dashboard)
+│
+├── templates/              [JINJA2 HTML TEMPLATES — UTAMA]
+│   ├── base.html                            Base template global
+│   ├── layouts/base_dashboard.html          Layout dashboard (nav, sidebar)
+│   ├── dashboard.html                       Dashboard Admin (22KB)
+│   ├── dashboard_guru.html                  Dashboard Guru Halaqoh
+│   ├── dashboard_pengajar.html              Dashboard Guru Pengajar
+│   ├── dashboard_halaqoh.html               Dashboard Halaqoh (22KB)
+│   ├── wali/dashboard.html                  Dashboard Wali Murid (24KB — TERBESAR)
+│   ├── academic/                           14 template halaman akademik
+│   ├── admin/                              7 template halaman admin
+│   ├── auth/                               Login, role selection, change password
+│   ├── landing/index.html                  Landing page (51KB — SANGAT BESAR)
+│   └── [+15 template root lainnya]
+│
+├── static/
+│   ├── img/                                4 gambar PNG dashboard (total ~2MB)
+│   └── landing/                            script.js + style.css landing page
+│
+└── scratch/                [🔴 FOLDER DEBUG — JANGAN DEPLOY]
+    ├── check_absensi_cols.py
+    ├── check_assignments_cols.py
+    ├── check_classes_cols.py
+    ├── check_schema.py
+    ├── check_teachers_table.py
+    ├── clean_app_py.py
+    ├── get_schema.py
+    └── test_relations.py
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN B — CARA KERJA SISTEM (SYSTEM FLOW)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[FLOW 1] STARTUP & INISIALISASI
+─────────────────────────────────
+app.py (baris 1-60):
+  1. Load .env → ambil SUPABASE_URL, SUPABASE_KEY, SUPABASE_SERVICE_ROLE_KEY, FLASK_SECRET_KEY
+  2. Validasi: jika SUPABASE_URL/KEY kosong → raise Exception (app tidak bisa jalan)
+  3. Buat 2 Supabase client:
+     - supabase          = client reguler (terikat RLS Supabase)
+     - admin_supabase    = client dengan SERVICE_ROLE_KEY (bypass semua RLS) [🔴 KRITIS]
+  4. Register semua Blueprint (auth, academic, halaqoh, wali, subscriptions, onboarding, landing)
+  5. app.run(debug=True) [🔴 JANGAN PRODUCTION]
+
+[FLOW 2] SISTEM LOGIN — 3 JALUR (app.py baris 169–338)
+─────────────────────────────────────────────────────────
+JALUR A — Guru via Custom Auth (username + password hash):
+  Request POST /login
+  → Query tabel 'users' (SaaS users) dengan email
+  → Jika tidak ditemukan → Query tabel 'teachers' (legacy)
+  → auth/repository.py: TeacherAuthRepository.get_account_by_username()
+  → auth/service.py: TeacherAuthService.authenticate() → check_password_hash()
+  → Jika valid → set session: user_id, teacher_id, role='guru', school_id, teacher_type, roles[]
+  → Load subscription context ke session
+  → Redirect ke dashboard sesuai teacher_type (pengajar/halaqoh)
+
+JALUR B — Admin/Wali via Supabase Auth (email + password Supabase):
+  Request POST /login
+  → supabase.auth.sign_in_with_password({email, password})
+  → Ambil profil dari tabel 'profiles' dengan admin_supabase
+  → Ambil school_id dari tabel 'user_schools'
+  → Jika role='wali' & belum ada school_id → cari dari 'parent_student_relations'
+  → Load subscription ke session
+  → Redirect dashboard berdasarkan role
+
+JALUR C — Guru Legacy via URL /auth/login-guru (username saja):
+  auth/routes.py
+  → TeacherAuthRepository → TeacherAuthService.authenticate()
+  → Set session manual → redirect ke auth.auto_dashboard
+
+[FLOW 3] OTORISASI & AKSES HALAMAN
+────────────────────────────────────
+auth/middleware.py:
+  @login_required   → cek 'user_id' di session, redirect ke /auth/login jika tidak ada
+  @role_required(*roles) → cek session['role'] dan session['roles'], redirect ke auto_dashboard
+
+domains/subscriptions/decorators/subscription_decorators.py:
+  @feature_required("nama_fitur") → cek session['features']['nama_fitur']
+  → Jika tidak ada → redirect ke /subscriptions/pricing
+
+[FLOW 4] ALUR ABSENSI AKADEMIK (domains/academic/)
+────────────────────────────────────────────────────
+  1. Guru login → masuk dashboard_pengajar
+  2. Pilih kelas → /academic/pilih-kelas
+  3. Pilih mata pelajaran → /academic/pilih-subject/<class_id>
+  4. Pilih tanggal → /academic/pilih-tanggal/<class_id>/<subject_id>
+  5. Input absensi per siswa → /academic/input-absensi/<class_id>/<subject_id>/<date>
+     → academic_routes.py → AcademicService.save_attendance() → AcademicRepository.upsert_attendance()
+     → Insert/update tabel 'absensi' dengan constraint UNIQUE(student_id, subject_id, date)
+  6. Lihat history → /academic/history-absensi/<class_id>
+
+[FLOW 5] ALUR HALAQOH (domains/halaqoh/ + app.py)
+──────────────────────────────────────────────────
+  1. Guru Halaqoh login → dashboard_halaqoh.html
+  2. Lihat daftar santri per halaqoh → /hafalan/halaqoh/<halaqoh_id>
+  3. Input hafalan per santri → /hafalan/<student_id> (app.py baris 1436)
+     → Validasi form (type, surah, ayat, pages_count, kualitas)
+     → Insert ke tabel 'hafalan' via admin_supabase
+  4. Weekly report → /admin/weekly-report
+  5. Target mingguan → /admin/weekly-targets
+
+[FLOW 6] DASHBOARD WALI MURID (domains/wali/)
+──────────────────────────────────────────────
+  1. Wali login (via Supabase Auth)
+  2. /wali/ → wali_routes.py → WaliService.build_dashboard()
+  3. WaliRepository.get_student_relations() → ambil siswa yang terhubung ke wali
+  4. Ambil hafalan + absensi siswa tersebut
+  5. Build chart kehadiran mingguan (7 hari terakhir)
+  6. Render templates/wali/dashboard.html
+
+[FLOW 7] MANAJEMEN SUBSCRIPTIONS
+──────────────────────────────────
+  1. Di setiap login → app.py load_subscription_to_session() (before_request)
+  2. Ambil data dari tabel 'school_subscriptions' JOIN 'subscription_plans'
+  3. Cek tanggal expired → jika lewat, downgrade features di session
+  4. Decorator @feature_required("analytics") → blokir akses jika plan tidak mendukung
+  5. SubscriptionService.check_limit() → cek max_students/max_teachers sebelum tambah data
+
+[FLOW 8] ONBOARDING SEKOLAH BARU (domains/auth/)
+─────────────────────────────────────────────────
+  /onboarding/register → saas_auth_routes.py → OnboardingService
+  → Buat user Supabase Auth
+  → Insert ke tabel 'schools', 'profiles', 'user_schools'
+  → Assign FREE subscription plan awal
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN C — APA YANG DITAMBAHKAN UNTUK MEMBANTU TIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+File-file berikut ditambahkan ke dalam folder output ZIP ini:
+(SEMUA FILE INI TIDAK MENGUBAH KODE ASLI)
+
+1. ANALISIS_MASTER_EBSENSI.txt     → File ini. Panduan lengkap untuk tim.
+
+2. PETA_ROUTE_ENDPOINTS.txt        → Daftar semua 43+ route dengan method, auth, dan fungsi.
+
+3. PETA_DATABASE_TABEL.txt         → Semua tabel yang digunakan, kolom kunci, dan relasi.
+
+4. CHECKLIST_REVIEW_TIM.txt        → Checklist siap pakai untuk sesi review kode tim.
+
+5. RISIKO_DAN_BREAKDOWN.txt        → Detail semua risiko per file, severity, dan saran cek.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN D — RISIKO & PENEGASAN FILE YANG HARUS DICEK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 KRITIS — CEK SEGERA SEBELUM DEPLOY
+
+[R-01] FILE: .env
+  MASALAH: SUPABASE_SERVICE_ROLE_KEY dan FLASK_SECRET_KEY ter-commit ke Git.
+  DAMPAK: Siapa pun yang akses repo GitHub dapat mengambil alih seluruh database.
+  FLASK_SECRET_KEY = "rahsia-flask-001" → sangat lemah, mudah ditebak.
+  CEK: Apakah .env ada di .gitignore? Jalankan: git log --all -- .env
+  TINDAKAN TIM: Pastikan .env ada di .gitignore, rotate semua key jika sudah push ke repo.
+
+[R-02] FILE: app.py (baris 1626)
+  MASALAH: app.run(debug=True, port=5000)
+  DAMPAK: Mode debug Flask di production membuka Werkzeug debugger — siapa pun bisa
+          eksekusi kode Python arbitrary di server melalui browser.
+  CEK: Pastikan ini HANYA ada di development. Production harus gunakan Gunicorn/uWSGI.
+
+[R-03] FILE: app.py (baris 56, 86, + 86 baris lain yang menggunakan admin_supabase)
+  MASALAH: admin_supabase (SERVICE_ROLE_KEY) digunakan di banyak route yang seharusnya
+           bisa menggunakan client reguler (supabase). Ini bypass semua Row Level Security.
+  DAMPAK: Jika ada satu route yang rentan (IDOR, injection), attacker bisa baca/tulis
+          SEMUA data dari SEMUA sekolah tanpa batasan.
+  CEK: Audit setiap penggunaan admin_supabase — apakah benar-benar perlu bypass RLS?
+  FILE TERKAIT: Hampir semua routes di app.py, academic_routes.py, halaqoh_routes.py
+
+[R-04] FILE: app.py (baris 228–260) — LOGIN JALUR B (SaaS users)
+  MASALAH: Login menggunakan tabel 'users' dengan plain text password check (tidak ada
+           hashing terlihat di segmen ini). Perlu dikonfirmasi apakah password di tabel
+           'users' sudah di-hash atau masih plain.
+  CEK: Periksa isi tabel 'users' di Supabase dashboard. Pastikan kolom password di-hash.
+
+[R-05] FILE: app.py (baris 340–346) — /register-guru
+  MASALAH: Route /register-guru hanya dicek session['role'] == 'guru', tapi tidak ada
+           school_id matching. Guru dari sekolah A secara teori bisa mendaftar guru ke
+           sekolah B jika school_id dimanipulasi dari form.
+  CEK: Validasi bahwa school_id yang dikirim form sama dengan session['school_id'].
+
+[R-06] FILE: app.py, academic_routes.py — IDOR Risk
+  MASALAH: Beberapa route mengambil resource berdasarkan ID dari URL parameter tanpa
+           memverifikasi kepemilikan school_id.
+  CONTOH BERISIKO: /hafalan/<student_id> — apakah selalu filter eq('school_id', school_id)?
+  CEK: Setiap query dengan ID dari URL harus selalu disertai .eq('school_id', session['school_id'])
+
+[R-07] FILE: .env — KEY TEREKSPOS
+  SUPABASE_KEY (publishable): sb_publishable_myOEKvYJuyWSXZnAw8-Fjg_gyz2lBUv
+  SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  STATUS: KEY INI SUDAH TERLIHAT DI FILE YANG DIKIRIM. Jika repo ini public, ROTATE KEY
+          DI SUPABASE DASHBOARD SEGERA.
+
+🟡 PERLU PERHATIAN — CEK SAAT REVIEW
+
+[W-01] FILE: app.py baris 19-22 — Debug print di production
+  MASALAH: print(f"--- STARTUP DEBUG ---") dan print(f"Supabase URL: {SUPABASE_URL}")
+  DAMPAK: Mencetak URL Supabase ke log server (bukan kritis, tapi sebaiknya dihapus/
+           diganti dengan logging.debug() untuk production).
+
+[W-02] FILE: domains/academic/routes/academic_routes.py (baris ~65)
+  MASALAH: master_subjects route tidak menggunakan @login_required / @role_required decorator
+           (langsung cek manual di dalam fungsi). Inkonsisten dengan pola di file lain.
+  CEK: Standardisasi penggunaan decorator di semua route.
+
+[W-03] FILE: auth/auth.py VS auth/middleware.py — DUPLIKASI
+  MASALAH: Ada DUA definisi login_required dan role_required:
+           - auth/auth.py: versi pertama (import dari auth.auth)
+           - auth/middleware.py: versi kedua (digunakan oleh domain routes)
+  DAMPAK: Jika ada bug di satu versi, versi lain tidak ter-update. Bisa menyebabkan
+           perbedaan perilaku keamanan.
+  CEK: Standarisasi ke satu file saja (auth/middleware.py sudah lebih lengkap).
+
+[W-04] FILE: app.py baris 170–338 — LOGIN FUNCTION TERLALU PANJANG
+  MASALAH: Fungsi login() mengandung 3 jalur auth berbeda dalam satu fungsi (~170 baris).
+           Ini produk vibe coding — logika terpisah-pisah dan sulit di-debug.
+  CEK: Tidak perlu diubah sekarang, tapi tandai untuk refactor di sprint berikutnya.
+
+[W-05] FILE: scratch/ — SCRIPT DEBUG MASIH ADA DI PROJECT
+  MASALAH: Folder scratch/ berisi 8 script Python untuk cek schema dan debug.
+  DAMPAK: Tidak berbahaya langsung, tapi tidak boleh ada di production deployment.
+  CEK: Pastikan folder ini ada di .gitignore atau dihapus sebelum deploy.
+
+[W-06] FILE: templates/landing/index.html (51KB)
+  MASALAH: File HTML landing page sangat besar. Kemungkinan inline CSS/JS yang besar.
+  CEK: Audit apakah ada script injection risk dari konten dinamis di halaman ini.
+
+[W-07] FILE: domains/auth/services/onboarding_service.py
+  MASALAH: Onboarding sekolah baru tidak terlihat ada validasi duplikasi nama sekolah
+           atau limit jumlah sekolah yang bisa daftar.
+  CEK: Pastikan ada validasi unik untuk nama/email sekolah saat onboarding.
+
+[W-08] FILE: domains/subscriptions/decorators/subscription_decorators.py
+  MASALAH: Fungsi check_subscription_status() didefinisikan tapi isinya hanya 'pass' —
+           tidak melakukan apa pun. Middleware ini tidak aktif.
+  CEK: Apakah ini disengaja (fitur belum selesai) atau oversight?
+
+🟢 KOMPONEN YANG TERLIHAT BAIK
+
+[G-01] auth/middleware.py — Penanganan AJAX request (return 401) sudah benar.
+[G-02] database/migrations/ — Migrasi SQL terstruktur dan menggunakan IF NOT EXISTS
+        dengan aman. Tidak akan error jika dijalankan ulang.
+[G-03] domains/academic/repositories/academic_repo.py — Selalu filter school_id di
+        setiap query (multi-tenancy isolation terlihat konsisten di domain ini).
+[G-04] domains/subscriptions/services/subscription_service.py — Logika parsing tanggal
+        expired sudah menangani berbagai format timezone (Z, +00:00, naive).
+[G-05] Input hafalan (app.py baris ~1470) — Validasi pages_count dilakukan dengan
+        double-try-except untuk handle float dan int edge cases.
+[G-06] SQL migration 03 — Constraint unik UNIQUE(student_id, subject_id, date) sudah
+        dipasang untuk mencegah duplikasi absensi per mata pelajaran per hari.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN E — PRESENTASE KUALITAS CODING & ESTIMASI RISIKO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SKOR KUALITAS KESELURUHAN: 58/100
+
+BREAKDOWN PER DIMENSI:
+┌─────────────────────────────────────┬────────┬───────────────────────────────────────┐
+│ Dimensi                             │ Skor   │ Keterangan                            │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Struktur & Arsitektur               │ 72/100 │ Domain-driven cukup bagus, tapi ada   │
+│                                     │        │ duplikasi modul auth                  │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Keamanan (Security)                 │ 38/100 │ .env di git, debug=True, admin client │
+│                                     │        │ overused, potential IDOR              │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Konsistensi Kode                    │ 55/100 │ 3 jalur login berbeda, 2 versi        │
+│                                     │        │ middleware, pola tidak standar         │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Validasi Input                      │ 70/100 │ Validasi form cukup lengkap di        │
+│                                     │        │ beberapa titik, masih ada yang bolong │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Error Handling                      │ 65/100 │ Kebanyakan pakai try-except + flash,  │
+│                                     │        │ cukup aman tapi generic               │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Maintainability                     │ 50/100 │ app.py 1626 baris, satu fungsi login  │
+│                                     │        │ 170 baris — sulit di-maintain         │
+├─────────────────────────────────────┼────────┼───────────────────────────────────────┤
+│ Database & Multi-Tenancy            │ 75/100 │ school_id isolation terlihat di repo  │
+│                                     │        │ layer, tapi perlu audit menyeluruh    │
+└─────────────────────────────────────┴────────┴───────────────────────────────────────┘
+
+ESTIMASI RISIKO KERUSAKAN JIKA LANGSUNG DEPLOY KE PRODUCTION:
+
+┌──────────────────────────────────────────────────────────────────┐
+│  RISIKO KEAMANAN DATA (Data Breach)         : 75% KEMUNGKINAN    │
+│  Penyebab: .env key terekspos + admin client overuse             │
+├──────────────────────────────────────────────────────────────────┤
+│  RISIKO CRASH/ERROR RUNTIME                 : 40% KEMUNGKINAN    │
+│  Penyebab: Error handling generic, tidak semua edge case         │
+│  ditangani (null data, missing session keys)                     │
+├──────────────────────────────────────────────────────────────────┤
+│  RISIKO CROSS-TENANT DATA LEAK              : 35% KEMUNGKINAN    │
+│  Penyebab: Jika ada satu query yang lupa filter school_id,       │
+│  data sekolah lain bisa bocor                                    │
+├──────────────────────────────────────────────────────────────────┤
+│  RISIKO SUBSCRIPTION BYPASS                 : 20% KEMUNGKINAN    │
+│  Penyebab: check_subscription_status() tidak aktif (isi 'pass') │
+├──────────────────────────────────────────────────────────────────┤
+│  RISIKO PERFORMA (Slow Load)                : 30% KEMUNGKINAN    │
+│  Penyebab: landing/index.html 51KB, dashboard.html 22-24KB,     │
+│  tidak ada caching layer                                         │
+└──────────────────────────────────────────────────────────────────┘
+
+KESIMPULAN KONDISI KODE:
+Sistem ini BERFUNGSI untuk development/demo, namun BELUM AMAN untuk production.
+Dampak utama dari vibe coding terlihat di: inkonsistensi pola auth, fungsi monolitik
+di app.py, dan overuse admin_supabase yang bypass RLS. Tidak ada bug fatal yang
+membuat sistem tidak bisa jalan, tapi ada beberapa celah keamanan serius yang harus
+ditutup sebelum go-live dengan data pengguna nyata.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN F — GITHUB LINK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Link GitHub akan ditambahkan oleh tim — placeholder:]
+
+Repository URL  : https://github.com/[USERNAME]/[REPO-NAME]
+Branch Utama    : main
+Last Commit     : 2026-05-16 (berdasarkan timestamp file)
+
+INSTRUKSI TIM SETELAH UPLOAD KE GITHUB:
+1. Pastikan .env ADA di .gitignore sebelum push
+2. Jangan push folder scratch/ ke main branch
+3. Jangan push folder __pycache__/ (tambahkan ke .gitignore jika belum)
+4. Rotate SUPABASE_SERVICE_ROLE_KEY di dashboard Supabase jika sudah pernah di-push
+5. Gunakan GitHub Secrets untuk semua environment variables di CI/CD
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF ANALISIS MASTER — EBSENSI SaaS APK
+Dibuat oleh: AI Analysis Assistant (READ ONLY — No code was modified)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

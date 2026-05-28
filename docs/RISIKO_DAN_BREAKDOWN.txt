@@ -1,0 +1,181 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║           RISIKO & BREAKDOWN DETAIL — EBSENSI SaaS APK                         ║
+║           Analisis mendalam per komponen dengan estimasi dampak                ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 1 — DAMPAK VIBE CODING YANG TERDETEKSI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Vibe coding (generate-then-iterate tanpa review mendalam) meninggalkan jejak berikut:
+
+1. INKONSISTENSI POLA (Paling Umum)
+   → 3 jalur auth dalam 1 fungsi login()
+   → 2 versi middleware auth (auth.py vs middleware.py)
+   → Beberapa route pakai decorator, beberapa pakai manual check
+   → Session keys tidak konsisten (name vs user_name)
+   DAMPAK: Sulit di-debug, mudah terjadi bug saat tim tambah fitur baru
+
+2. UKURAN FILE TIDAK PROPORSIONAL
+   → app.py: 1626 baris (terlalu besar untuk satu file)
+   → templates/landing/index.html: 51KB
+   → domains/academic/routes/academic_routes.py: 20KB
+   DAMPAK: Sulit navigate, merge conflict sering terjadi di git
+
+3. KODE YANG BELUM SELESAI (Tapi Tidak Di-tandai)
+   → check_subscription_status() isinya 'pass'
+   → Folder scratch/ masih ada (8 debug script)
+   → Template dashboard auth sangat minimal
+   → 6 placeholder routes (coming soon)
+   DAMPAK: Tim tidak tahu mana yang fitur selesai vs belum
+
+4. KEAMANAN DI-SKIP UNTUK KECEPATAN
+   → admin_supabase digunakan di 86+ tempat (banyak yang bisa pakai client reguler)
+   → FLASK_SECRET_KEY lemah
+   → .env kemungkinan ter-commit
+   → debug=True dibiarkan
+   DAMPAK: Ini risiko terbesar dari vibe coding — security sering diabaikan demi speed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 2 — BREAKDOWN RISIKO PER KOMPONEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────┬──────────┬─────────┬────────────────────────────────┐
+│ Komponen / File             │ Risiko   │ Dampak  │ Keterangan                     │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ .env (API Keys)             │ 🔴 KRITIS│ TINGGI  │ Service role key terekspos;    │
+│                             │          │         │ Secret key lemah               │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ app.py - debug=True         │ 🔴 KRITIS│ TINGGI  │ RCE vulnerability di prod      │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ admin_supabase overuse      │ 🔴 KRITIS│ TINGGI  │ Bypass RLS di 86+ tempat;      │
+│                             │          │         │ risiko cross-tenant leak       │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Login jalur B (tabel users) │ 🔴 HIGH  │ SEDANG  │ Perlu konfirmasi hash password │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Delete via GET method       │ 🔴 HIGH  │ SEDANG  │ Rentan CSRF tanpa token        │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ auth/auth.py vs middleware  │ 🟡 MED   │ SEDANG  │ Duplikasi, bisa diverge        │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Session key inconsistency   │ 🟡 MED   │ SEDANG  │ Template bisa error saat render│
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Migration 03 (absensi)      │ 🟡 MED   │ TINGGI  │ Jika belum dijalankan,         │
+│                             │          │         │ fitur absensi per mapel error   │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ check_subscription_status() │ 🟡 MED   │ RENDAH  │ Middleware tidak aktif (pass)  │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ app.py login() 170 baris    │ 🟡 LOW   │ RENDAH  │ Maintainability issue          │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ scratch/ debug scripts      │ 🟡 LOW   │ RENDAH  │ Tidak aman di production       │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ landing/index.html 51KB     │ 🟢 INFO  │ PERFORMA│ Mungkin bisa dioptimasi        │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Debug print startup         │ 🟢 INFO  │ RENDAH  │ Log URL Supabase ke console    │
+├─────────────────────────────┼──────────┼─────────┼────────────────────────────────┤
+│ Template placeholders       │ 🟢 INFO  │ RENDAH  │ Fitur coming soon (normal)     │
+└─────────────────────────────┴──────────┴─────────┴────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 3 — ESTIMASI PROBABILITAS BUG PRODUCTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Skenario bug yang paling mungkin terjadi jika langsung deploy:
+
+SKENARIO A — Absensi Per Mapel Tidak Bisa Simpan (Probabilitas: 60%)
+  Penyebab: Migration 03 belum dijalankan di database.
+  Gejala: Error "duplicate key value violates unique constraint" atau
+          kolom subject_id tidak ditemukan saat insert.
+  File terkait: domains/academic/routes/academic_routes.py
+  Solusi: Jalankan migration 03 di Supabase SQL Editor.
+
+SKENARIO B — Nama User Kosong di Template (Probabilitas: 40%)
+  Penyebab: Beberapa jalur login set session['name'], yang lain set session['user_name'].
+  Gejala: Tampilan "Halo, None!" atau nama kosong di navbar.
+  File terkait: templates/layouts/base_dashboard.html
+  Solusi: Audit semua session set dan standardisasi ke satu key.
+
+SKENARIO C — Guru Tidak Bisa Login Setelah Tambah Guru (Probabilitas: 35%)
+  Penyebab: Route /register-guru tidak selalu set teacher_account dengan benar,
+            atau ada race condition antara insert teachers dan teacher_accounts.
+  Gejala: Login username guru gagal meski akun baru dibuat.
+  File terkait: app.py baris 340-346, auth/repository.py
+
+SKENARIO D — Dashboard Wali Kosong / Error (Probabilitas: 30%)
+  Penyebab: school_id wali diambil dari parent_student_relations, yang bisa NULL
+            jika relasi belum dibuat oleh admin.
+  Gejala: Dashboard wali kosong atau 500 error.
+  File terkait: domains/wali/services/wali_service.py, wali_repo.py
+
+SKENARIO E — Subscription Tidak Load (Probabilitas: 25%)
+  Penyebab: load_subscription_to_session() dipanggil di before_request setiap request,
+            jika tabel school_subscriptions kosong untuk sekolah baru, ada edge case
+            yang perlu diverifikasi.
+  Gejala: session['features'] tidak ada → @feature_required error.
+  File terkait: app.py baris 151-167, subscription_service.py
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 4 — FILE YANG PALING PERLU DI-REVIEW TIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+URUTAN PRIORITAS REVIEW:
+
+1. 🔴 .env
+   Langkah: git log --all --full-history -- .env
+   Target: Konfirmasi tidak ada di git history
+
+2. 🔴 app.py (baris 169-338) — Fungsi login()
+   Langkah: Trace ketiga jalur auth, test masing-masing secara manual
+   Target: Semua jalur berfungsi dan aman
+
+3. 🔴 app.py — Semua 86 penggunaan admin_supabase
+   Langkah: grep -n "admin_supabase" app.py
+   Target: Tandai mana yang perlu vs tidak perlu bypass RLS
+
+4. 🟡 database/migrations/03_subject_based_system.sql
+   Langkah: Cek di Supabase apakah sudah dijalankan
+   Target: Konfirmasi status migration
+
+5. 🟡 auth/auth.py vs auth/middleware.py
+   Langkah: Bandingkan kedua file, identifikasi perbedaan behavior
+   Target: Standarisasi ke satu file
+
+6. 🟡 domains/academic/routes/academic_routes.py (20KB)
+   Langkah: Review setiap route, pastikan school_id selalu difilter
+   Target: Tidak ada query tanpa filter school_id
+
+7. 🟡 domains/wali/services/wali_service.py + wali_repo.py
+   Langkah: Test login sebagai wali, cek edge case siswa tanpa relasi
+   Target: Tidak ada 500 error di dashboard wali
+
+8. 🟡 domains/subscriptions/services/subscription_service.py
+   Langkah: Test onboarding sekolah baru, cek apakah FREE plan ter-assign otomatis
+   Target: Sekolah baru langsung dapat subscription context
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 5 — PENEGASAN URUTAN DEPLOY YANG AMAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SEBELUM PUSH KE GITHUB:
+  ✓ .env ada di .gitignore
+  ✓ __pycache__/ ada di .gitignore
+  ✓ scratch/ ada di .gitignore
+  ✓ Tidak ada file .pyc ikut ter-commit
+
+SEBELUM DEPLOY KE STAGING:
+  ✓ Semua P1 checklist selesai
+  ✓ FLASK_SECRET_KEY sudah diganti ke string kuat
+  ✓ debug=True diubah ke debug=False (atau dihapus, pakai gunicorn)
+  ✓ Migration 03 sudah dijalankan di database target
+  ✓ Test login ketiga jalur berhasil
+
+SEBELUM DEPLOY KE PRODUCTION:
+  ✓ Semua P1 dan minimal 5/8 P2 checklist selesai
+  ✓ SUPABASE keys sudah di-rotate jika pernah terekspos
+  ✓ Environment variables di-set sebagai secrets (bukan .env di server)
+  ✓ Testing absensi per mapel berhasil end-to-end
+  ✓ Testing dashboard wali dengan data nyata berhasil
+  ✓ Rate limiting dipertimbangkan untuk route /login
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF RISIKO & BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

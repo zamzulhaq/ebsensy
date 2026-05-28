@@ -1,0 +1,97 @@
+# PROMPT TEMPLATE — ANALISIS TAMBAHAN FILE BARU
+# Simpan file ini, gunakan saat ada file/fitur baru yang perlu dianalisis
+
+==============================================================
+PROMPT UNTUK DIPAKAI (copy-paste ke Claude):
+==============================================================
+
+Halo, aku punya proyek Ebsensi SaaS yang sebelumnya sudah pernah kamu analisis penuh.
+Sekarang ada [PILIH SALAH SATU]:
+- file baru yang ditambahkan
+- fitur baru yang dibuat
+- bug yang ditemukan dan perlu di-trace
+- file lama yang dimodifikasi
+
+Berikut konteks proyeknya (dari AGENT_CONTEXT.md):
+
+[PASTE ISI FILE AGENT_CONTEXT.md DI SINI]
+
+---
+
+File/perubahan baru yang perlu dianalisis:
+[PASTE KODE FILE BARU DI SINI — atau sebutkan nama file dan perubahannya]
+
+---
+
+Tolong lakukan:
+1. Analisis file/perubahan ini terhadap sistem yang sudah ada
+2. Cek apakah ada potensi konflik dengan komponen lain (sebutkan file yang terdampak)
+3. Cek apakah pola kode konsisten dengan konvensi proyek (lihat KONVENSI di AGENT_CONTEXT.md)
+4. Beri tanda [🔴 RISIKO] / [🟡 PERLU CEK] / [🟢 AMAN] untuk setiap temuan
+5. Jangan ubah kode — hanya analisis dan beri rekomendasi untuk tim
+6. Tambahkan hasil analisis ke file ANALISIS_MASTER_EBSENSI.txt yang sudah ada (buat append section baru)
+
+Output yang diinginkan:
+- Analisis singkat (bukan dari awal — fokus ke perubahan baru saja)
+- Daftar file yang perlu dicek ulang oleh tim
+- Update checklist jika ada item baru yang perlu direview
+
+==============================================================
+VARIASI PROMPT (sesuaikan kebutuhan):
+==============================================================
+
+--- VARIASI A: Trace Bug ---
+"Ada bug di fitur [nama fitur]. Gejalanya: [deskripsikan gejala].
+Berdasarkan AGENT_CONTEXT.md di bawah ini, bantu tim melacak di file mana bug ini kemungkinan berada dan apa penyebabnya."
+
+--- VARIASI B: Review Sebelum Merge ---
+"Ini adalah kode baru yang akan di-merge ke main branch. Tolong review apakah:
+1. Aman secara keamanan (tidak ada bypass auth, IDOR, injection)
+2. Konsisten dengan pola proyek
+3. Tidak merusak fitur yang sudah ada
+Jangan ubah kode, cukup berikan laporan review."
+
+--- VARIASI C: Cek Satu Fitur Spesifik ---
+"Tolong fokus analisis pada modul [academic/halaqoh/wali/subscriptions] saja.
+Tidak perlu analisis ulang seluruh proyek. Cukup review:
+1. Apakah school_id selalu difilter di semua query?
+2. Apakah auth decorator sudah dipasang di semua route?
+3. Ada error handling yang bolong?"
+
+--- VARIASI D: Tambah Domain Baru ---
+"Aku akan tambah domain baru bernama [nama domain] dengan fungsi [deskripsi].
+Berdasarkan struktur proyek yang ada, bantu aku:
+1. Tentukan struktur folder yang tepat
+2. Template file yang perlu dibuat (routes, service, repo)
+3. Tabel database yang perlu dibuat
+4. Risiko integrasi dengan sistem yang sudah ada"
+
+==============================================================
+TIPS PENGGUNAAN:
+==============================================================
+
+✅ DO:
+- Selalu paste AGENT_CONTEXT.md sebagai konteks awal
+- Sebutkan dengan jelas file mana yang berubah
+- Lampirkan kode file baru/yang diubah langsung
+- Minta output spesifik (bukan analisis ulang dari awal)
+
+❌ DON'T:
+- Jangan minta Claude mengubah kode production
+- Jangan skip konteks AGENT_CONTEXT.md (analisis akan kurang akurat)
+- Jangan minta analisis seluruh proyek ulang jika perubahan kecil
+
+==============================================================
+CATATAN UPDATE AGENT_CONTEXT.md:
+==============================================================
+
+Setiap kali ada perubahan signifikan pada proyek, update bagian ini di AGENT_CONTEXT.md:
+- Tambah tabel baru ke bagian "TABEL DATABASE UTAMA"
+- Tambah route baru ke bagian "BLUEPRINT ROUTES"
+- Update status risiko jika sudah diperbaiki
+- Update status fitur "Coming Soon" jika sudah aktif
+- Update bagian "FITUR YANG BELUM SELESAI" jika ada yang selesai
+
+==============================================================
+Zamify © 2026 — Santri Mantap
+==============================================================

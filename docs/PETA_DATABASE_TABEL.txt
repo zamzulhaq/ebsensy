@@ -1,0 +1,251 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║           PETA DATABASE & TABEL — EBSENSI SaaS APK                             ║
+║           Direkonstruksi dari kode (query, migration SQL, model)               ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+⚠️  CATATAN: Tabel-tabel ini diidentifikasi dari kode sumber.
+    Schema lengkap hanya bisa dilihat di Supabase Dashboard.
+    Tim harus verifikasi langsung ke Supabase.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 1 — MULTI-TENANT CORE (SaaS Infrastructure)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: schools
+  - id            UUID  PK
+  - name          VARCHAR
+  [Digunakan di: register, onboarding, login, semua relasi school_id]
+
+TABEL: profiles
+  - id            UUID  PK (= Supabase Auth user.id)
+  - full_name     VARCHAR
+  - role          VARCHAR  [admin, owner, wali, siswa]
+  - school_id     UUID     [FK ke schools — fallback jika tidak di user_schools]
+  [Digunakan di: login Supabase auth, onboarding]
+
+TABEL: user_schools
+  - user_id       UUID  FK → Supabase Auth users
+  - school_id     UUID  FK → schools
+  [Many-to-many: satu user bisa di banyak sekolah]
+  [Digunakan di: login Supabase, ambil school_id user]
+
+TABEL: users                        [🟡 PERLU KONFIRMASI — mungkin parallel dengan profiles]
+  - id            UUID
+  - email         VARCHAR
+  - name          VARCHAR
+  - role          VARCHAR
+  - school_id     UUID
+  [Digunakan di: jalur login B (SaaS users) di app.py baris 228]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 2 — AUTHENTICATION GURU (Custom Auth / Legacy)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: teachers
+  - id            UUID  PK
+  - name          VARCHAR
+  - email         VARCHAR
+  - school_id     UUID  FK → schools
+  - teacher_type  VARCHAR  [pengajar, halaqoh, admin]
+  [Induk data guru. Digunakan di hampir semua fitur guru]
+
+TABEL: teacher_accounts              [Dari migration 01]
+  - id            UUID  PK
+  - teacher_id    UUID  FK → teachers (ON DELETE CASCADE)
+  - username      VARCHAR UNIQUE
+  - password_hash VARCHAR   [bcrypt hash]
+  - must_change_password  BOOLEAN
+  - last_login    TIMESTAMPTZ
+  - created_at    TIMESTAMPTZ
+  [Digunakan di: login guru via username + password]
+
+TABEL: teacher_roles                 [Dari migration 02]
+  - id            UUID  PK
+  - teacher_id    UUID  FK → teachers
+  - role          VARCHAR  [pengajar, halaqoh, admin]
+  - created_at    TIMESTAMPTZ
+  - UNIQUE(teacher_id, role)
+  [Mendukung multi-role guru]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 3 — AKADEMIK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: classes
+  - id            UUID  PK
+  - name          VARCHAR
+  - school_id     UUID  FK → schools
+  [Digunakan di: semua fitur kelas, absensi, hafalan, assignment]
+
+TABEL: students
+  - id            UUID  PK
+  - name          VARCHAR
+  - school_id     UUID  FK → schools
+  - class_id      UUID  FK → classes
+  [Siswa adalah entitas utama — digunakan di hampir semua tabel]
+
+TABEL: subjects                      [Diperbarui di migration 03]
+  - id            UUID  PK
+  - school_id     UUID  FK → schools
+  - name          VARCHAR
+  - subject_code  VARCHAR  [kode mapel unik per sekolah]
+  - category      VARCHAR  [Akademik, Tahfidz]
+  - education_level VARCHAR
+  - description   TEXT
+  - is_active     BOOLEAN  DEFAULT TRUE
+
+TABEL: teacher_subject_assignments   [Dari migration 03]
+  - id            UUID  PK
+  - school_id     UUID  FK → schools
+  - teacher_id    UUID  FK → users (bukan teachers!)   [🟡 PERLU KONFIRMASI]
+  - class_id      UUID  FK → classes
+  - subject_id    UUID  FK → subjects
+  - created_at    TIMESTAMPTZ
+  - UNIQUE(school_id, teacher_id, class_id, subject_id)
+  [Mapping guru → kelas → mata pelajaran]
+
+TABEL: absensi                       [Dimodifikasi di migration 03]
+  - id            UUID  PK
+  - student_id    UUID  FK → students
+  - class_id      UUID  FK → classes
+  - school_id     UUID  FK → schools
+  - date          DATE
+  - status        VARCHAR  [Hadir, Sakit, Izin, Alfa]
+  - subject_id    UUID  FK → subjects  [KOLOM BARU dari migration 03]
+  - UNIQUE(student_id, subject_id, date)   [constraint baru, menggantikan (student_id, date)]
+  [🟡 PERHATIAN: Jika migration 03 belum dijalankan, kolom subject_id tidak ada
+   dan constraint lama masih berlaku → absensi per hari, bukan per mapel]
+
+TABEL: exam_types
+  - id            UUID  PK
+  - school_id     UUID  FK → schools
+  - name          VARCHAR  [UTS, UAS, Kuis, dll]
+  - weight        INTEGER  [bobot nilai]
+
+TABEL: exams
+  - id            UUID  PK
+  - school_id     UUID  FK → schools
+  - teacher_id    UUID
+  - class_id      UUID  FK → classes
+  - subject_id    UUID  FK → subjects
+  - exam_type_id  UUID  FK → exam_types
+  - exam_date     DATE
+  - title         VARCHAR
+
+TABEL: exam_scores                   [Nilai ujian per siswa]
+  - id            UUID  PK
+  - exam_id       UUID  FK → exams
+  - student_id    UUID  FK → students
+  - score         NUMERIC
+
+TABEL: assignments                   [Tugas]
+  - id            UUID  PK
+  - school_id     UUID  FK → schools
+  - class_id      UUID  FK → classes
+  - subject_id    UUID  FK → subjects
+  - teacher_id    UUID
+  - title         VARCHAR
+  - due_date      DATE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 4 — HALAQOH (Al-Quran)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: halaqoh
+  - id            UUID  PK
+  - name          VARCHAR
+  - school_id     UUID  FK → schools
+  - teacher_id    UUID  FK → teachers
+  [Grup belajar Al-Quran]
+
+TABEL: halaqoh_students              [Many-to-many siswa ke halaqoh]
+  - halaqoh_id    UUID  FK → halaqoh
+  - student_id    UUID  FK → students
+
+TABEL: hafalan
+  - id            UUID  PK
+  - student_id    UUID  FK → students
+  - school_id     UUID  FK → schools
+  - teacher_id    UUID  FK → teachers
+  - type          VARCHAR  [hafalan_baru, murojaah, robert]
+  - surah         VARCHAR
+  - ayat_start    INTEGER
+  - ayat_end      INTEGER
+  - pages_count   INTEGER
+  - kualitas      VARCHAR  [Lancar, Cukup, Perlu Mengulang]
+  - note          TEXT
+  - created_at    TIMESTAMPTZ
+
+TABEL: weekly_targets
+  - id            UUID  PK
+  - class_id      UUID  FK → classes
+  - week_start    DATE   [Senin awal minggu]
+  - target_pages  INTEGER
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 5 — WALI MURID (Orang Tua)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: parent_student_relations
+  - id               UUID  PK
+  - parent_profile_id UUID  FK → profiles (wali)
+  - student_id       UUID  FK → students
+  - school_id        UUID  FK → schools
+  [Relasi orang tua dengan siswa yang dipantau]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GRUP 6 — SUBSCRIPTIONS (SaaS Billing)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABEL: subscription_plans
+  - id              UUID  PK
+  - name            VARCHAR  [Free Plan, Basic, Premium, dll]
+  - max_students    INTEGER
+  - max_teachers    INTEGER
+  - features        JSONB    [{"reports": true, "analytics": false, ...}]
+  - price           NUMERIC
+
+TABEL: school_subscriptions
+  - id              UUID  PK
+  - school_id       UUID  FK → schools
+  - plan_id         UUID  FK → subscription_plans
+  - status          VARCHAR  [active, inactive, expired]
+  - expired_at      TIMESTAMPTZ
+  [Digunakan di: setiap login, cek fitur & limit]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DIAGRAM RELASI RINGKAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+schools ──────┬──── classes ──── students ──┬──── absensi
+              │                             ├──── hafalan
+              │                             └──── parent_student_relations ─── profiles (wali)
+              ├──── teachers ──┬── teacher_accounts
+              │                └── teacher_roles
+              ├──── subjects ──── teacher_subject_assignments
+              ├──── exams ──── exam_scores
+              ├──── halaqoh ──── halaqoh_students
+              ├──── school_subscriptions ──── subscription_plans
+              └──── weekly_targets
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  POTENSI KONFLIK TABEL YANG HARUS DIKONFIRMASI TIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. TABEL 'users' vs TABEL 'profiles' vs TABEL 'teachers':
+   Ada 3 tabel yang bisa mewakili "pengguna". Konfirmasi peran masing-masing:
+   - teachers  → guru dengan password hash lokal (custom auth)
+   - profiles  → user Supabase Auth (admin, wali, siswa)
+   - users     → kemungkinan tabel SaaS users tambahan (perlu konfirmasi)
+
+2. teacher_subject_assignments.teacher_id → FK ke 'users' (bukan 'teachers')
+   Ini inkonsisten. Guru disimpan di tabel 'teachers' tapi assignment-nya
+   pakai user_id. Cek apakah ini disengaja (guru bisa punya akun Supabase Auth
+   sekaligus akun teacher_accounts).
+
+3. CONSTRAINT absensi setelah migration 03:
+   - SEBELUM migration 03: UNIQUE(student_id, date) — satu siswa satu absensi per hari
+   - SESUDAH migration 03:  UNIQUE(student_id, subject_id, date) — per mapel per hari
+   Jika migration belum dijalankan di database production, kode baru akan error
+   saat mencoba input absensi per mata pelajaran.
+   → CEK: Sudah jalankan migration 03? Lihat di Supabase Dashboard > SQL Editor

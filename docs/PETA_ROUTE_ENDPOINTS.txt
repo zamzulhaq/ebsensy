@@ -1,0 +1,192 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║           PETA ROUTE & ENDPOINTS — EBSENSI SaaS APK                            ║
+║           Untuk Tim: Navigasi cepat ke setiap endpoint                         ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+FORMAT: [METHOD] /path → fungsi() | Auth | Keterangan
+Auth: 🔓=Public, 🔑=Login Required, 👑=Admin, 👨‍🏫=Guru, 👪=Wali
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app.py — ROUTES UTAMA (43 route)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[GET]  /                     → index()              🔓  Redirect ke dashboard atau login
+[GET]  /login                → login()              🔓  Halaman login utama
+[POST] /login                → login()              🔓  Proses 3 jalur auth
+[GET]  /register             → register()           🔓  Daftar user baru (non-wali)
+[POST] /register             → register()           🔓  Proses registrasi + Supabase
+[GET]  /register-guru        → register_guru()      👑  Form tambah akun guru
+[POST] /register-guru        → register_guru()      👑  Simpan akun guru
+[GET]  /logout               → logout()             🔑  Hapus session
+[GET]  /dashboard            → dashboard()          👑  Dashboard admin utama
+[GET]  /guru/dashboard       → guru_dashboard()     👨‍🏫 Dashboard guru (legacy)
+[GET]  /dashboard-pengajar   → dashboard_pengajar() 👨‍🏫 Dashboard guru pengajar
+[GET]  /dashboard-halaqoh    → dashboard_halaqoh()  👨‍🏫 Dashboard guru halaqoh
+
+--- MANAJEMEN KELAS ---
+[GET]  /tambah-kelas          → tambah_kelas()        👑  Form tambah kelas
+[POST] /tambah-kelas          → tambah_kelas()        👑  Simpan kelas baru
+[GET]  /edit-kelas/<id>       → edit_kelas()          👑  Form edit kelas
+[POST] /edit-kelas/<id>       → edit_kelas()          👑  Update data kelas
+[GET]  /hapus-kelas/<id>      → hapus_kelas()         👑  Hapus kelas
+[GET]  /kelas/<class_id>      → detail_kelas()        👑  Detail kelas + daftar siswa
+
+--- MANAJEMEN SISWA ---
+[GET]  /siswa                 → list_siswa()           👑  Daftar semua siswa
+[GET]  /tambah-siswa          → tambah_siswa()         👑  Form tambah siswa
+[POST] /tambah-siswa          → tambah_siswa()         👑  Simpan siswa baru
+[GET]  /edit-siswa/<id>       → edit_siswa()           👑  Form edit siswa
+[POST] /edit-siswa/<id>       → edit_siswa()           👑  Update data siswa
+[GET]  /hapus-siswa/<id>      → hapus_siswa()          👑  Hapus siswa
+
+--- MANAJEMEN GURU ---
+[GET]  /guru                  → list_guru()            👑  Daftar semua guru
+[GET]  /tambah-guru           → tambah_guru()          👑  Form tambah guru
+[POST] /tambah-guru           → tambah_guru()          👑  Simpan guru baru
+[GET]  /edit-guru/<id>        → edit_guru()            👑  Form edit guru
+[POST] /edit-guru/<id>        → edit_guru()            👑  Update data guru
+[GET]  /hapus-guru/<id>       → hapus_guru()           👑  Hapus guru
+
+--- ABSENSI ---
+[GET]  /absensi/<class_id>    → input_absensi()        👨‍🏫 Form absensi per kelas
+[POST] /absensi/<class_id>    → input_absensi()        👨‍🏫 Simpan data absensi
+
+--- HAFALAN (QURAN) ---
+[GET]  /hafalan/kelas/<id>          → hafalan_kelas()        👨‍🏫 Pilih siswa untuk hafalan
+[GET]  /hafalan/halaqoh/<id>        → hafalan_halaqoh()      👨‍🏫 Santri per halaqoh
+[GET]  /hafalan/<student_id>        → input_hafalan()        👨‍🏫 Form input hafalan + statistik
+[POST] /hafalan/<student_id>        → input_hafalan()        👨‍🏫 Simpan catatan hafalan
+[GET]  /hafalan/edit/<hafalan_id>   → edit_hafalan()         👨‍🏫 Form edit hafalan
+[POST] /hafalan/edit/<hafalan_id>   → edit_hafalan()         👨‍🏫 Update hafalan
+
+--- ADMIN HALAQOH ---
+[GET]  /admin/halaqoh                        → admin_halaqoh()           👑  Daftar halaqoh
+[GET]  /admin/halaqoh/create                 → create_halaqoh()          👑  Form buat halaqoh
+[POST] /admin/halaqoh/create                 → create_halaqoh()          👑  Simpan halaqoh
+[GET]  /admin/halaqoh/edit/<id>              → edit_halaqoh()            👑  Form edit halaqoh
+[POST] /admin/halaqoh/edit/<id>              → edit_halaqoh()            👑  Update halaqoh
+[GET]  /admin/halaqoh/delete/<id>            → delete_halaqoh()          👑  Hapus halaqoh
+[GET]  /admin/halaqoh/<id>/students          → manage_halaqoh_students() 👑  Kelola anggota
+[POST] /admin/halaqoh/<id>/students          → manage_halaqoh_students() 👑  Tambah/hapus anggota
+
+--- WEEKLY TARGETS & REPORT ---
+[GET]  /admin/weekly-targets                 → weekly_targets()          👑  Daftar target
+[GET]  /admin/weekly-targets/create          → create_weekly_target()    👑  Form target
+[POST] /admin/weekly-targets/create          → create_weekly_target()    👑  Simpan target
+[GET]  /admin/weekly-targets/edit/<id>       → edit_weekly_target()      👑  Edit target
+[POST] /admin/weekly-targets/edit/<id>       → edit_weekly_target()      👑  Update target
+[GET]  /admin/weekly-targets/delete/<id>     → delete_weekly_target()    👑  Hapus target
+[GET]  /admin/weekly-report                  → weekly_report()           👑  Laporan mingguan
+
+--- PLACEHOLDER (FITUR BELUM TERSEDIA) ---
+[GET]  /academic/jadwal                      → placeholder_jadwal()       Redirect /coming-soon
+[GET]  /academic/nilai                       → placeholder_nilai()        Redirect /coming-soon
+[GET]  /academic/raport                      → placeholder_raport()       Redirect /coming-soon
+[GET]  /academic/murojaah                    → placeholder_murojaah()     Redirect /coming-soon
+[GET]  /finance                              → placeholder_finance()      Redirect /coming-soon
+[GET]  /settings                             → placeholder_settings()     Redirect /coming-soon
+[GET]  /coming-soon/<module_name>            → coming_soon()              Template placeholder
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: auth_bp — prefix: /auth
+(auth/routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /auth/login             → login()            🔓  Redirect jika sudah login
+[POST] /auth/login             → login()            🔓  Proses login
+[GET]  /auth/login-guru        → login_guru()       🔓  Login via username guru
+[POST] /auth/login-guru        → login_guru()       🔓  Proses login guru
+[GET]  /auth/auto-dashboard    → auto_dashboard()   🔑  Redirect ke dashboard sesuai role
+[GET]  /auth/admin/dashboard   → admin_dashboard()  👑  Template admin minimal
+[GET]  /auth/guru/dashboard    → guru_dashboard()   👨‍🏫 Template guru minimal
+[GET]  /auth/wali/dashboard    → wali_dashboard()   👪  Template wali minimal
+[GET]  /auth/siswa/dashboard   → siswa_dashboard()  🔑  Template siswa minimal
+[GET]  /auth/change-password   → change_password()  🔑  Form ganti password
+[POST] /auth/change-password   → change_password()  🔑  Proses ganti password
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: academic_bp — prefix: /academic
+(domains/academic/routes/academic_routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /academic/master/subjects          Kelola mata pelajaran (admin)
+[POST] /academic/master/subjects          Add/Edit/Delete mata pelajaran
+[GET]  /academic/master                   Master data kelas & siswa (admin)
+[POST] /academic/master                   Add/Edit kelas atau siswa
+[GET]  /academic/my-classes               Kelas yang diajar guru
+[GET]  /academic/pilih-kelas              Step 1: Pilih kelas untuk absensi
+[GET]  /academic/pilih-subject/<class_id> Step 2: Pilih mata pelajaran
+[GET]  /academic/pilih-tanggal/<...>      Step 3: Pilih tanggal
+[GET]  /academic/input-absensi/<...>      Step 4: Form input absensi
+[POST] /academic/input-absensi/<...>      Simpan absensi
+[GET]  /academic/history-absensi/<id>     Riwayat absensi per kelas
+[GET]  /academic/absensi-sessions/<id>    Sesi-sesi absensi yang pernah ada
+[GET]  /academic/exams                    Daftar ujian (guru)
+[GET]  /academic/exams/create             Form buat ujian
+[POST] /academic/exams/create             Simpan ujian
+[GET]  /academic/exams/edit/<id>          Edit ujian
+[POST] /academic/exams/edit/<id>          Update ujian
+[GET]  /academic/exams/delete/<id>        Hapus ujian
+[GET]  /academic/exams/<id>/scores        Daftar nilai siswa
+[POST] /academic/exams/<id>/scores        Simpan nilai siswa
+[GET]  /academic/assignments              Daftar tugas
+[POST] /academic/assignments              Add tugas
+[GET]  /academic/class/<id>               Detail kelas akademik
+[GET]  /academic/reports                  Laporan absensi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: halaqoh_bp — prefix: /halaqoh
+(domains/halaqoh/routes/halaqoh_routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /halaqoh/master                    Master data halaqoh
+[GET]  /halaqoh/exams                     Daftar ujian hafalan
+[GET]  /halaqoh/exams/create              Form ujian hafalan
+[POST] /halaqoh/exams/create              Simpan ujian hafalan
+[GET]  /halaqoh/exams/<id>/grades         Input nilai ujian santri
+[POST] /halaqoh/exams/<id>/grades         Simpan nilai
+[GET]  /halaqoh/reports                   Laporan hafalan
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: wali_bp — prefix: /wali
+(domains/wali/routes/wali_routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /wali/                             Dashboard orang tua
+[GET]  /wali/admin/list                   Kelola daftar wali (admin)
+[GET]  /wali/admin/create                 Form tambah wali
+[POST] /wali/admin/create                 Simpan wali baru
+[GET]  /wali/admin/edit/<id>              Edit data wali
+[POST] /wali/admin/edit/<id>              Update data wali
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: subscriptions_bp — prefix: /subscriptions
+(domains/subscriptions/routes/subscription_routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /subscriptions/pricing             Halaman pricing plans
+[GET]  /subscriptions/upgrade             Trigger upgrade (placeholder)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: saas_auth_bp — prefix: /onboarding
+(domains/auth/routes/saas_auth_routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /onboarding/register               Form daftar sekolah baru ke SaaS
+[POST] /onboarding/register               Proses onboarding sekolah
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BLUEPRINT: landing_bp — prefix: /
+(domains/landing/routes.py)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[GET]  /                                  Landing page (redirect jika sudah login)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  CATATAN UNTUK TIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Route /register dan /register-guru di app.py dan /onboarding/register di Blueprint
+   adalah DUA SISTEM REGISTRASI BERBEDA. Tim harus konfirmasi mana yang digunakan.
+
+2. Ada route /auth/login DAN /login di app.py — DUPLIKASI. Pastikan tidak membingungkan
+   user yang salah URL.
+
+3. Semua route hapus (hapus-kelas, hapus-guru, hapus-siswa, delete halaqoh) menggunakan
+   GET method — ini tidak ideal untuk operasi destructive. Standar REST menggunakan DELETE.
+   [🟡 Perlu dicek apakah ada CSRF protection]
+
+4. Route /admin/halaqoh/<id>/students menerima GET dan POST — cek apakah ada validasi
+   CSRF token di form POST ini.

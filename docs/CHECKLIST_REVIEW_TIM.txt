@@ -1,0 +1,180 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║           CHECKLIST REVIEW TIM — EBSENSI SaaS APK                              ║
+║           Gunakan file ini saat sesi code review bersama tim                   ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+INSTRUKSI: Centang ( ✅ ) setiap item setelah tim memverifikasinya.
+Tambahkan nama reviewer dan tanggal di kolom kanan setiap item selesai.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔴 PRIORITAS 1 — SECURITY (Harus selesai sebelum production)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] 1.1  FILE: .env
+         Periksa apakah .env ada di .gitignore
+         Jalankan: cat .gitignore | grep ".env"
+         Expected: ".env" muncul di output
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.2  FILE: .env
+         Periksa apakah .env sudah pernah di-commit ke git
+         Jalankan: git log --all --full-history -- .env
+         Expected: Tidak ada output (belum pernah di-commit)
+         Jika ADA output → ROTATE semua key di Supabase SEGERA
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.3  FILE: .env
+         Ganti FLASK_SECRET_KEY dari "rahsia-flask-001" ke string random yang kuat
+         Generator: python3 -c "import secrets; print(secrets.token_hex(32))"
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.4  FILE: app.py (baris 1626)
+         Konfirmasi bahwa app.run(debug=True) TIDAK digunakan di production
+         Production harus pakai: gunicorn app:app atau serupa
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.5  FILE: app.py — admin_supabase usage audit
+         Audit setiap penggunaan admin_supabase (86 penggunaan di app.py)
+         Tandai mana yang BENAR perlu bypass RLS vs yang bisa pakai supabase reguler
+         Target: Gunakan admin_supabase hanya untuk operasi server-side yang benar-benar perlu
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.6  FILE: app.py (baris 228-260) — Login Jalur B
+         Verifikasi apakah password di tabel 'users' disimpan plain text atau sudah hash
+         Buka Supabase Dashboard → Table Editor → users → lihat kolom password
+         Expected: Password di-hash (tidak boleh plain text)
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.7  FILE: app.py — CSRF Protection
+         Periksa apakah ada CSRF protection untuk semua form POST
+         Flask-WTF atau manual CSRF token?
+         Cari di: grep -rn "csrf" --include="*.py" --include="*.html"
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.8  ROUTES: Hapus/Delete via GET method
+         Route hapus-kelas, hapus-guru, hapus-siswa, delete halaqoh menggunakan GET
+         Ini rentan CSRF — klik link bisa hapus data
+         Konfirmasi apakah ada proteksi lain (login check sudah ada, tapi belum cukup)
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.9  IDOR CHECK — Hafalan
+         Buka app.py baris 1436-1440 (route /hafalan/<student_id>)
+         Pastikan ada filter .eq('school_id', school_id) di SEMUA query dalam fungsi ini
+         Seorang guru dari sekolah A tidak boleh bisa akses data siswa dari sekolah B
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 1.10 IDOR CHECK — Edit/Hapus Guru, Siswa, Kelas
+         Periksa route edit-guru/<id>, hapus-guru/<id>, edit-siswa/<id>, hapus-siswa/<id>
+         Pastikan setiap query menggunakan filter school_id dari session
+         Reviewer: ____________  Tanggal: ____________
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟡 PRIORITAS 2 — KONSISTENSI & BUGS LOGIKA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] 2.1  FILE: auth/auth.py vs auth/middleware.py — DUPLIKASI
+         Ada 2 versi login_required dan role_required
+         Tentukan versi mana yang jadi standar (auth/middleware.py disarankan)
+         Update semua import yang masih menggunakan auth/auth.py
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.2  FILE: app.py vs auth/routes.py — DUPLIKASI ROUTE LOGIN
+         Ada /login di app.py DAN /auth/login di auth/routes.py
+         Konfirmasi mana yang jadi "canonical login URL"
+         Pastikan tidak ada konflik redirect loop
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.3  DATABASE: Migration 03 Status
+         Cek apakah migration 03 sudah dijalankan di database production
+         Buka Supabase SQL Editor → jalankan:
+         SELECT column_name FROM information_schema.columns
+         WHERE table_name='absensi' AND column_name='subject_id';
+         Expected: Satu baris hasil (kolom exists)
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.4  DATABASE: Konfirmasi relasi teacher_subject_assignments
+         teacher_id di tabel ini FK ke 'users' atau 'teachers'?
+         Cek di Supabase: SQL Editor → \d teacher_subject_assignments
+         Konfirmasi dengan logic di academic_routes.py
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.5  FILE: domains/subscriptions/decorators/subscription_decorators.py
+         Fungsi check_subscription_status() isinya hanya 'pass' — tidak aktif
+         Apakah ini disengaja (fitur belum selesai) atau lupa diisi?
+         Konfirmasi dan dokumentasikan keputusannya
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.6  FILE: app.py — 3 Login Paths
+         Ada 3 jalur login dalam satu fungsi login() di app.py (baris 169-338)
+         Test ketiga jalur:
+         a. Guru dengan username (teacher_accounts)
+         b. Admin/Wali dengan email Supabase Auth
+         c. SaaS users dengan email (tabel users)
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.7  FILE: domains/academic/routes/academic_routes.py — Inkonsistensi Decorator
+         route master_subjects() menggunakan cek manual (if session.get('role') not in [...])
+         bukan @role_required decorator
+         Tandai untuk standardisasi
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 2.8  SESSION KEYS CONSISTENCY
+         Beberapa tempat menggunakan session['user_name'], beberapa session['name']
+         Cek: grep -rn "session\['name'\]\|session\['user_name'\]" --include="*.py"
+         Pastikan konsisten agar template tidak error saat render nama user
+         Reviewer: ____________  Tanggal: ____________
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 PRIORITAS 3 — KUALITAS & KEBERSIHAN KODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] 3.1  FOLDER: scratch/
+         Pastikan 8 file debug di folder scratch/ tidak ter-deploy ke production
+         Tambahkan ke .gitignore jika belum: echo "scratch/" >> .gitignore
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.2  FILE: app.py baris 19-22 — Debug print statements
+         print(f"--- STARTUP DEBUG ---") harus dihapus/dinonaktifkan untuk production
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.3  FILE: app.py — Fungsi monolitik
+         Fungsi login() ~170 baris, fungsi input_hafalan() ~100+ baris
+         Tandai untuk refactor di sprint selanjutnya (bukan sekarang)
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.4  FILE: ebsensy (file kosong di root)
+         File ini 0 bytes — apakah placeholder, marker, atau file yang lupa dihapus?
+         Konfirmasi dengan pembuat kode asal
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.5  TEMPLATES: Template yang tidak digunakan
+         Beberapa template di templates/auth/dashboards/ sangat minimal (< 400 bytes)
+         Konfirmasi apakah ini placeholder yang belum diisi atau memang cukup
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.6  FILE: templates/landing/index.html (51KB)
+         File ini sangat besar. Review konten — apakah ada inline script atau
+         resource yang bisa dioptimasi atau dipindahkan ke static/
+         Reviewer: ____________  Tanggal: ____________
+
+[ ] 3.7  .gitignore — Kompilasi Python
+         Pastikan __pycache__/ dan *.pyc ada di .gitignore
+         cat .gitignore | grep pycache
+         Reviewer: ____________  Tanggal: ____________
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 RINGKASAN PROGRESS REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prioritas 1 (Security):   ___/10 selesai
+Prioritas 2 (Logic):      ___/8  selesai
+Prioritas 3 (Quality):    ___/7  selesai
+
+TOTAL:                    ___/25 selesai
+
+STATUS READY PRODUCTION:
+[ ] Semua P1 selesai → BARU BOLEH deploy ke staging/production
+[ ] Minimal 5/8 P2 selesai → Dianjurkan
+[ ] P3 bisa dilakukan bertahap
+
+Leader Review: ____________  Tanggal Approval: ____________

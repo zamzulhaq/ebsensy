@@ -188,8 +188,8 @@ Zamify © 2026 — All Rights Reserved.
 
 ## 📬 Kontak
 
-GitHub: [Link akan ditambahkan]
+GitHub: https://github.com/zamzulhaq/
 
 ---
 
-*"Ilmu tanpa amal seperti pohon tanpa buah" — Dibuat dengan ❤️ oleh Santri Mantap*
+*"Ilmu tanpa amal seperti pohon tanpa buah" — Dibuat dengan ❤️ oleh Santri*

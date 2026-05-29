@@ -1,0 +1,438 @@
+# PETA DATABASE — EBSENSY ERP SAAS
+
+## RULE PENTING PROJECT
+
+### WAJIB
+
+* Semua query HARUS menggunakan `school_id`
+* Gunakan field asli database
+* Gunakan relation yang sudah ada
+* Gunakan repository/service pattern
+
+### DILARANG
+
+* Membuat table baru tanpa approval
+* Rename field existing
+* Hardcode data tenant
+* Query tanpa tenant isolation
+* Mengubah schema langsung tanpa migration
+
+---
+
+# DATABASE ARCHITECTURE
+
+Project menggunakan:
+
+* PostgreSQL
+* Supabase
+* Multi Tenant Architecture
+* school_id isolation
+* SaaS ERP Architecture
+
+---
+
+# CORE RELATION FLOW
+
+```txt
+schools
+│
+├── teachers
+├── students
+├── classes
+├── halaqoh_groups
+├── subjects
+├── exams
+├── attendance
+├── memorization_records
+└── subscriptions
+```
+
+---
+
+# TABLE: schools
+
+## Fungsi
+
+Master tenant sekolah.
+
+## Relation
+
+```txt
+schools.id
+→ semua table menggunakan school_id
+```
+
+## Rule
+
+* Semua data HARUS terkait ke school_id
+* Tidak boleh cross-tenant access
+
+---
+
+# TABLE: teachers
+
+## Fungsi
+
+Data guru / ustadz / pengajar.
+
+## Relation
+
+```txt
+teachers.school_id → schools.id
+teachers.subject_id → subjects.id
+```
+
+## Digunakan oleh
+
+* absensi
+* input nilai
+* halaqoh
+* dashboard guru
+* raport
+
+## Notes
+
+Teacher mendukung multi-role system.
+
+---
+
+# TABLE: students
+
+## Fungsi
+
+Master data siswa/santri.
+
+## Relation
+
+```txt
+students.school_id → schools.id
+students.class_id → classes.id
+students.wali_id → wali.id
+```
+
+## Digunakan oleh
+
+* absensi
+* hafalan
+* raport
+* dashboard wali
+* ranking
+
+---
+
+# TABLE: classes
+
+## Fungsi
+
+Data kelas akademik.
+
+## Relation
+
+```txt
+classes.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* student grouping
+* absensi
+* raport
+* ujian
+
+---
+
+# TABLE: subjects
+
+## Fungsi
+
+Mata pelajaran.
+
+## Relation
+
+```txt
+subjects.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* exam system
+* guru mapel
+* nilai
+* raport
+
+---
+
+# TABLE: attendance
+
+## Fungsi
+
+Absensi siswa.
+
+## Relation
+
+```txt
+attendance.student_id → students.id
+attendance.teacher_id → teachers.id
+attendance.class_id → classes.id
+attendance.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* dashboard
+* rekap absensi
+* raport
+* parent monitoring
+
+---
+
+# TABLE: exams
+
+## Fungsi
+
+Master ujian.
+
+## Relation
+
+```txt
+exams.subject_id → subjects.id
+exams.class_id → classes.id
+exams.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* input nilai
+* raport
+* ranking
+
+---
+
+# TABLE: exam_scores
+
+## Fungsi
+
+Nilai siswa.
+
+## Relation
+
+```txt
+exam_scores.exam_id → exams.id
+exam_scores.student_id → students.id
+```
+
+## Digunakan oleh
+
+* raport
+* ranking
+* dashboard akademik
+
+---
+
+# TABLE: halaqoh_groups
+
+## Fungsi
+
+Kelompok halaqoh tahfidz.
+
+## Relation
+
+```txt
+halaqoh_groups.teacher_id → teachers.id
+halaqoh_groups.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* tahfidz
+* monitoring hafalan
+* dashboard halaqoh
+
+---
+
+# TABLE: memorization_records
+
+## Fungsi
+
+Riwayat hafalan santri.
+
+## Relation
+
+```txt
+memorization_records.student_id → students.id
+memorization_records.teacher_id → teachers.id
+memorization_records.halaqoh_id → halaqoh_groups.id
+```
+
+## Digunakan oleh
+
+* raport tahfidz
+* grafik hafalan
+* dashboard wali
+* monitoring santri
+
+---
+
+# TABLE: wali
+
+## Fungsi
+
+Akun wali murid.
+
+## Relation
+
+```txt
+wali.student_id → students.id
+wali.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* parent dashboard
+* monitoring siswa
+* raport online
+
+---
+
+# TABLE: subscriptions
+
+## Fungsi
+
+Subscription SaaS sekolah.
+
+## Relation
+
+```txt
+subscriptions.school_id → schools.id
+```
+
+## Digunakan oleh
+
+* feature gating
+* billing
+* SaaS access control
+
+---
+
+# REPORTING VIEW
+
+## academic_report_view
+
+Gabungan data:
+
+* siswa
+* nilai
+* absensi
+* akademik
+
+Digunakan untuk:
+
+* raport akademik
+* ranking
+
+---
+
+## halaqoh_report_view
+
+Gabungan data:
+
+* hafalan
+* halaqoh
+* perkembangan tahfidz
+
+Digunakan untuk:
+
+* raport tahfidz
+* dashboard wali
+
+---
+
+# RULE QUERY
+
+## WAJIB
+
+Contoh BENAR:
+
+```sql
+SELECT *
+FROM students
+WHERE school_id = %s
+```
+
+## SALAH
+
+```sql
+SELECT * FROM students
+```
+
+Karena:
+
+* bisa bocor antar tenant
+* melanggar multi-tenant isolation
+
+---
+
+# MIGRATION RULE
+
+Semua perubahan database:
+
+* WAJIB melalui migration SQL
+* simpan di:
+
+```txt
+database/migrations/
+```
+
+Contoh:
+
+```txt
+01_create_teacher_accounts.sql
+02_multi_role_system.sql
+03_subject_based_system.sql
+```
+
+---
+
+# AI / CODEGEN RULE
+
+AI DILARANG:
+
+* membuat schema sendiri
+* rename field
+* mengubah relation tanpa approval
+
+WAJIB:
+
+* menggunakan schema asli
+* membaca file ini sebelum coding
+* mengikuti tenant isolation
+
+---
+
+# STATUS ARCHITECTURE
+
+Current Architecture:
+
+* Flask Modular Architecture
+* Service Layer Pattern
+* Repository Pattern
+* Multi Tenant SaaS
+* ERP Sekolah Tahfidz
+
+---
+
+# FUTURE MODULE
+
+Planned:
+
+* Parent Monitoring System
+* PDF Raport Engine
+* SaaS Billing
+* Audit Logs
+* Notification System
+* Mobile App
+* WA Gateway
+
+---
+
+END OF DOCUMENT

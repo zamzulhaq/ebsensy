@@ -73,3 +73,20 @@ def create_wali():
 
     options = service.get_form_options(school_id)
     return render_template('wali/admin_form.html', students=options['students'])
+
+@wali_bp.route('/admin/reset-password/<wali_id>', methods=['POST'])
+@login_required
+@role_required("admin")
+def admin_reset_password(wali_id):
+    new_password = request.form.get('new_password')
+    service = get_wali_service()
+    
+    from app import admin_supabase
+    
+    success, msg = service.reset_wali_password(
+        admin_supabase.auth.admin,
+        wali_id,
+        new_password
+    )
+    flash(msg, "success" if success else "danger")
+    return redirect(url_for('wali.list_wali'))

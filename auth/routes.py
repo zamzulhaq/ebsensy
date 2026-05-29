@@ -55,7 +55,7 @@ def login_guru():
         
         from app import admin_supabase
         from auth.repository import TeacherAuthRepository
-        from auth.service import AuthService
+        from auth.service import AuthService, TeacherAuthService
         
         repo = TeacherAuthRepository(admin_supabase)
         service = TeacherAuthService(repo)
@@ -126,6 +126,7 @@ def change_password():
 
         from app import admin_supabase
         from auth.service import TeacherAuthService
+        from auth.repository import TeacherAuthRepository
         repo = TeacherAuthRepository(admin_supabase)
         service = TeacherAuthService(repo)
         
@@ -147,6 +148,7 @@ def admin_reset_password(teacher_id):
     
     from app import admin_supabase
     from auth.service import TeacherAuthService
+    from auth.repository import TeacherAuthRepository
     repo = TeacherAuthRepository(admin_supabase)
     service = TeacherAuthService(repo)
     

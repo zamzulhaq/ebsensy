@@ -58,10 +58,16 @@
                             </td>
                             <td class="px-10 py-6 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <a href="#" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all flex items-center justify-center">
+                                    <form method="POST" action="{{ url_for('wali.admin_reset_password', wali_id=wali.id) }}" class="inline" onsubmit="return confirmReset(this)">
+                                        <input type="hidden" name="new_password" class="new-password-input">
+                                        <button type="submit" class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all flex items-center justify-center" title="Reset Password">
+                                            <i class="fas fa-key text-[10px]"></i>
+                                        </button>
+                                    </form>
+                                    <a href="#" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center" title="Edit">
                                         <i class="fas fa-edit text-[10px]"></i>
                                     </a>
-                                    <a href="#" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center">
+                                    <a href="#" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center" title="Hapus">
                                         <i class="fas fa-trash text-[10px]"></i>
                                     </a>
                                 </div>
@@ -84,4 +90,15 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmReset(form) {
+    const pwd = prompt("Masukkan password baru untuk wali ini (minimal 6 karakter):");
+    if (pwd === null) return false;
+    if (pwd.trim() === "") return false;
+    if (pwd.trim().length < 6) { alert("Password baru harus minimal 6 karakter!"); return false; }
+    form.querySelector('.new-password-input').value = pwd;
+    return true;
+}
+</script>
 {% endblock %}

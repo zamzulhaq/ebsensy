@@ -164,7 +164,8 @@ class WaliService:
                 'email_confirm': True,
                 'user_metadata': {
                     'full_name': full_name,
-                    'role': 'wali'
+                    'role': 'wali',
+                    'must_change_password': True
                 }
             })
             auth_user = auth_response.user
@@ -197,6 +198,28 @@ class WaliService:
                 except Exception:
                     pass
             return False, f"Gagal membuat akun wali: {str(exc)}"
+
+    def reset_wali_password(self, auth_admin, profile_id, new_password):
+        if not new_password or len(new_password) < 6:
+            return False, "Password baru harus minimal 6 karakter."
+            
+        try:
+            # Dapatkan user saat ini untuk mempertahankan metadata
+            user_data = auth_admin.get_user_by_id(profile_id)
+            if not user_data or not user_data.user:
+                return False, "Akun wali tidak ditemukan."
+                
+            metadata = user_data.user.user_metadata or {}
+            metadata['must_change_password'] = True
+            
+            # Update password & metadata
+            auth_admin.update_user_by_id(
+                profile_id,
+                {"password": new_password, "user_metadata": metadata}
+            )
+            return True, "Password berhasil direset."
+        except Exception as exc:
+            return False, f"Gagal reset password: {str(exc)}"
 
     def _auth_email_exists(self, auth_admin, email):
         page = 1

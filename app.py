@@ -309,6 +309,11 @@ def login():
                     session['max_teachers'] = sub_context['max_teachers']
                     session['is_expired'] = sub_context['is_expired']
 
+                if user.user_metadata.get('must_change_password'):
+                    session['must_change_password'] = True
+                    session['email'] = user.email
+                    return redirect(url_for('auth.change_password'))
+
                 return redirect(url_for('dashboard'))
             
             # Cek profil Guru (Legacy Fallback)
